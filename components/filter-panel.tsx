@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
+import { type CheckedState } from "@radix-ui/react-checkbox"
 
 // Define a proper type instead of using any
 interface FilterOptions {
@@ -37,6 +38,12 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
   const [bookmarkedOnly, setBookmarkedOnly] = useState(false)
   const [urgentOnly, setUrgentOnly] = useState(false)
   const [statusFilter, setStatusFilter] = useState("all")
+
+  const handleCheckboxChange = (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+    return (checked: CheckedState) => {
+      setter(checked === true);
+    };
+  };
 
   const handleReset = () => {
     setCategory("all")
@@ -158,7 +165,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
                 <Checkbox 
                   id="filter-bookmarked-only" 
                   checked={bookmarkedOnly}
-                  onCheckedChange={setBookmarkedOnly}
+                  onCheckedChange={handleCheckboxChange(setBookmarkedOnly)}
                 />
                 <Label htmlFor="filter-bookmarked-only">Bookmarked only</Label>
               </div>
@@ -166,7 +173,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
                 <Checkbox 
                   id="filter-hide-expired" 
                   checked={hideExpired}
-                  onCheckedChange={setHideExpired}
+                  onCheckedChange={handleCheckboxChange(setHideExpired)}
                 />
                 <Label htmlFor="filter-hide-expired">Hide expired grants</Label>
               </div>
@@ -174,7 +181,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
                 <Checkbox 
                   id="filter-urgent-only" 
                   checked={urgentOnly}
-                  onCheckedChange={setUrgentOnly}
+                  onCheckedChange={handleCheckboxChange(setUrgentOnly)}
                 />
                 <Label htmlFor="filter-urgent-only">Show urgent only</Label>
               </div>
