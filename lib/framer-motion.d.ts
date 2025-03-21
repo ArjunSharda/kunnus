@@ -15,13 +15,20 @@ declare module "framer-motion" {
     viewport?: any;
   }
 
-  type MotionComponentProps<T extends React.ElementType> = React.ComponentPropsWithoutRef<T> & AnimationProps;
+  type MotionProps = {
+    [key: string]: any;
+  }
+
+  export interface HTMLMotionProps<T extends HTMLElement> extends 
+    React.HTMLAttributes<T>,
+    AnimationProps,
+    React.RefAttributes<T> {
+      children?: React.ReactNode;
+  }
 
   type HTMLMotionComponents = {
-    [K in keyof JSX.IntrinsicElements]: React.ForwardRefExoticComponent<
-      MotionComponentProps<K> & React.RefAttributes<HTMLElement>
-    >;
-  };
+    [K in keyof JSX.IntrinsicElements]: React.FC<HTMLMotionProps<any> & JSX.IntrinsicElements[K]>;
+  }
 
   export const motion: HTMLMotionComponents;
 }
