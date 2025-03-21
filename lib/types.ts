@@ -26,7 +26,7 @@ export interface SavedSearch {
   id: string
   name: string
   query: string
-  filters: Record<string, unknown>
+  filters: Record<string, any>
   timestamp: number
 }
 
@@ -42,4 +42,3 @@ export interface ThemePreference {
   borderRadius: "none" | "small" | "medium" | "large"
   animation: "none" | "slow" | "medium" | "fast"
 }
-

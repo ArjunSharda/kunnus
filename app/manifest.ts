@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
   return {
     name: "Educator Grant Finder",
     short_name: "Grant Finder",
@@ -23,4 +23,3 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
   }
 }
-

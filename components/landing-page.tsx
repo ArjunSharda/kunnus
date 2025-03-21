@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, CheckCircle, Award, Search, Calendar, BookOpen, Users } from "lucide-react"
+import { ArrowRight, CheckCircle, Award, Search, Calendar, BookOpen, Users } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -285,12 +285,6 @@ export default function LandingPage() {
                 author: "Emily Chen",
                 role: "Art Teacher, Westview Middle School",
               },
-              {
-                quote:
-                  "GrantFindr has revolutionized how our district approaches funding opportunities. It&apos;s saved us countless hours.",
-                author: "John Doe",
-                role: "Superintendent, Springfield School District",
-              },
             ].map((testimonial, index) => (
               <motion.div
                 key={index}
@@ -300,7 +294,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 className="bg-card border rounded-xl p-6 relative"
               >
-                <div className="absolute -top-4 left-6 text-primary text-6xl opacity-20">&quot;</div>
+                <div className="absolute -top-4 left-6 text-primary text-6xl opacity-20">"</div>
                 <p className="text-lg mb-6 relative z-10">{testimonial.quote}</p>
                 <div>
                   <p className="font-semibold">{testimonial.author}</p>
@@ -369,4 +363,3 @@ export default function LandingPage() {
     </div>
   )
 }
-

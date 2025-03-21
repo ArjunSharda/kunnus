@@ -32,4 +32,3 @@ export const generatePDF = (grants: Grant[], statuses: Record<string, Applicatio
   a.click()
   document.body.removeChild(a)
 }
-
