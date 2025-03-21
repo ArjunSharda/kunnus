@@ -635,11 +635,13 @@ export default function GrantFinder() {
     }
 
     if (filters.minAmount) {
-      filtered = filtered.filter((grant) => grant.amount >= filters.minAmount)
+      // Add non-null assertion since we're already checking for existence
+      filtered = filtered.filter((grant) => grant.amount >= filters.minAmount!)
     }
 
     if (filters.maxAmount) {
-      filtered = filtered.filter((grant) => grant.amount <= filters.maxAmount)
+      // Add non-null assertion here too
+      filtered = filtered.filter((grant) => grant.amount <= filters.maxAmount!)
     }
 
     if (filters.deadlineDays) {
@@ -648,7 +650,7 @@ export default function GrantFinder() {
         const deadlineDate = new Date(grant.deadline)
         const diffTime = deadlineDate.getTime() - today.getTime()
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-        return diffDays <= filters.deadlineDays
+        return diffDays <= filters.deadlineDays!
       })
     }
 
