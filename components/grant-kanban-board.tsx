@@ -121,7 +121,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
             <Droppable droppableId={status}>
               {(provided, snapshot) => (
                 <div
-                  ref={provided.innerRef}
+                  ref={provided.innerRef as React.RefObject<HTMLDivElement>}
                   {...provided.droppableProps}
                   className={cn(
                     "flex-1 p-2 rounded-md min-h-[500px]",
