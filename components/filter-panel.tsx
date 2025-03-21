@@ -9,8 +9,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 
+// Define a proper type instead of using any
+interface FilterOptions {
+  category?: string;
+  schoolType?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  deadlineDays?: number | null;
+  hideExpired?: boolean;
+  bookmarkedOnly?: boolean;
+  urgentOnly?: boolean;
+  statusFilter?: string;
+}
+
 interface FilterPanelProps {
-  onApplyFilters: (filters: any) => void
+  onApplyFilters: (filters: FilterOptions) => void
 }
 
 export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
@@ -28,14 +41,18 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
     onApplyFilters({})
   }
 
-  const handleApply = () => {
+  const handleApplyFilters = () => {
     onApplyFilters({
-      category: category !== "all" ? category : null,
-      schoolType: schoolType !== "all" ? schoolType : null,
+      category,
+      schoolType,
       minAmount: amountRange[0],
       maxAmount: amountRange[1],
       deadlineDays,
-    })
+      hideExpired: Boolean(hideExpired),
+      bookmarkedOnly: Boolean(bookmarkedOnly),
+      urgentOnly: Boolean(urgentOnly),
+      statusFilter,
+    } as FilterOptions)
   }
 
   return (
@@ -153,7 +170,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
         <Button variant="outline" onClick={handleReset}>
           Reset
         </Button>
-        <Button onClick={handleApply}>Apply Filters</Button>
+        <Button onClick={handleApplyFilters}>Apply Filters</Button>
       </div>
     </div>
   )

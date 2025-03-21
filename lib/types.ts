@@ -26,7 +26,7 @@ export interface SavedSearch {
   id: string
   name: string
   query: string
-  filters: Record<string, any>
+  filters: Record<string, unknown>
   timestamp: number
 }
 

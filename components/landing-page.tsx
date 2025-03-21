@@ -285,6 +285,12 @@ export default function LandingPage() {
                 author: "Emily Chen",
                 role: "Art Teacher, Westview Middle School",
               },
+              {
+                quote:
+                  "GrantFindr has revolutionized how our district approaches funding opportunities. It&apos;s saved us countless hours.",
+                author: "John Doe",
+                role: "Superintendent, Springfield School District",
+              },
             ].map((testimonial, index) => (
               <motion.div
                 key={index}

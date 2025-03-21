@@ -100,11 +100,6 @@ export default function GrantCalendarView({ grants, bookmarkedGrants, statuses }
     return getGrantsForDate(date).some((grant) => bookmarkedGrants.includes(grant.id))
   }
 
-  // Format date as YYYY-MM-DD
-  const formatDateKey = (date: Date) => {
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-  }
-
   // Get the day of the week names
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 

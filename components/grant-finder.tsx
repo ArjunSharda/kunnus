@@ -96,6 +96,19 @@ import Link from "next/link"
 // Number of grants to show per page
 const ITEMS_PER_PAGE = 9
 
+// Define a proper type for filters
+interface FilterOptions {
+  category?: string;
+  schoolType?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  deadlineDays?: number | null;
+  hideExpired?: boolean;
+  bookmarkedOnly?: boolean;
+  urgentOnly?: boolean;
+  statusFilter?: string;
+}
+
 export default function GrantFinder() {
   const { toast } = useToast()
   const [grants, setGrants] = useState<Grant[]>([])
@@ -284,9 +297,16 @@ export default function GrantFinder() {
       }
     }
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [currentPage, totalPages])
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [
+    currentPage, 
+    totalPages, 
+    setCurrentPage, 
+    setViewMode, 
+    applyThemePreferences, 
+    toggleDarkMode
+  ])
 
   // Apply theme preferences
   const applyThemePreferences = () => {
@@ -378,7 +398,7 @@ export default function GrantFinder() {
   useEffect(() => {
     localStorage.setItem("themePreference", JSON.stringify(themePreference))
     applyThemePreferences()
-  }, [themePreference])
+  }, [themePreference, applyThemePreferences])
 
   useEffect(() => {
     localStorage.setItem("cardSize", JSON.stringify(cardSize))
@@ -602,7 +622,7 @@ export default function GrantFinder() {
   }
 
   // Apply filters from filter panel
-  const applyFilters = (filters: any) => {
+  const applyFilters = (filters: FilterOptions) => {
     let filtered = grants
 
     if (filters.category && filters.category !== "all") {
@@ -880,7 +900,7 @@ export default function GrantFinder() {
             duration: 3000,
           })
         })
-        .catch((error) => {
+        .catch(() => {
           toast({
             title: "Share Failed",
             description: "There was an error sharing your grants",
@@ -1413,7 +1433,7 @@ export default function GrantFinder() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuLabel>Card Size</DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={cardSize} onValueChange={(value) => setCardSize(value as any)}>
+                <DropdownMenuRadioGroup value={cardSize} onValueChange={(value) => setCardSize(value as "compact" | "normal" | "detailed")}>
                   <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="normal">Normal</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="detailed">Detailed</DropdownMenuRadioItem>

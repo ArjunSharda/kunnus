@@ -1,4 +1,5 @@
 declare module "framer-motion" {
-  export const motion: any
+  // Using Record<string, unknown> instead of any
+  export const motion: Record<string, unknown>
 }
 
