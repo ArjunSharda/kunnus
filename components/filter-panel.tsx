@@ -32,6 +32,11 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
   const [amountRange, setAmountRange] = useState([0, 100000])
   const [deadlineDays, setDeadlineDays] = useState<number | null>(null)
   const [activeTab, setActiveTab] = useState("basic")
+  // Add missing state variables
+  const [hideExpired, setHideExpired] = useState(false)
+  const [bookmarkedOnly, setBookmarkedOnly] = useState(false)
+  const [urgentOnly, setUrgentOnly] = useState(false)
+  const [statusFilter, setStatusFilter] = useState("all")
 
   const handleReset = () => {
     setCategory("all")
@@ -150,15 +155,27 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
             <Label>Custom Filters</Label>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Checkbox id="filter-bookmarked-only" />
+                <Checkbox 
+                  id="filter-bookmarked-only" 
+                  checked={bookmarkedOnly}
+                  onCheckedChange={setBookmarkedOnly}
+                />
                 <Label htmlFor="filter-bookmarked-only">Bookmarked only</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="filter-hide-expired" />
+                <Checkbox 
+                  id="filter-hide-expired" 
+                  checked={hideExpired}
+                  onCheckedChange={setHideExpired}
+                />
                 <Label htmlFor="filter-hide-expired">Hide expired grants</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="filter-urgent-only" />
+                <Checkbox 
+                  id="filter-urgent-only" 
+                  checked={urgentOnly}
+                  onCheckedChange={setUrgentOnly}
+                />
                 <Label htmlFor="filter-urgent-only">Show urgent only</Label>
               </div>
             </div>

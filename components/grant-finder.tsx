@@ -6,7 +6,7 @@ import { CardHeader } from "@/components/ui/card"
 import { Card } from "@/components/ui/card"
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import {
   Search,
   Filter,
@@ -309,7 +309,7 @@ export default function GrantFinder() {
   ])
 
   // Apply theme preferences
-  const applyThemePreferences = () => {
+  const applyThemePreferences = useCallback(() => {
     // Apply primary color
     document.documentElement.style.setProperty(
       "--primary-hue",
@@ -351,7 +351,7 @@ export default function GrantFinder() {
               ? "0.15"
               : "0.3",
     )
-  }
+  }, [themePreference]) // Add themePreference as a dependency
 
   // Save state to localStorage when it changes
   useEffect(() => {
@@ -493,7 +493,7 @@ export default function GrantFinder() {
 
     // Reset to first page when filters change
     setCurrentPage(1)
-  }, [searchQuery, grants, activeTab, bookmarkedGrants, activeFolder, bookmarkFolders, sortOption])
+  }, [searchQuery, grants, activeTab, bookmarkedGrants, activeFolder, bookmarkFolders, sortOption, sortGrants])
 
   // Toggle bookmark for a grant
   const toggleBookmark = (grantId: string) => {
@@ -584,10 +584,10 @@ export default function GrantFinder() {
   }
 
   // Toggle dark mode
-  const toggleDarkMode = () => {
+  const toggleDarkMode = useCallback(() => {
     setIsDarkMode(!isDarkMode)
     document.documentElement.classList.toggle("dark")
-  }
+  }, [isDarkMode]) // Add isDarkMode as a dependency
 
   // Export bookmarked grants as CSV
   const exportBookmarkedGrants = (format: "csv" | "pdf") => {
