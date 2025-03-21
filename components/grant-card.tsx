@@ -12,7 +12,7 @@ import {
   School,
   Edit,
   FolderPlus,
-  CheckCircle2,
+  CheckCircle,
   Share2,
   FileText,
   MapPin,
@@ -534,7 +534,7 @@ export default function GrantCard({
                   <>
                     <div>
                       <h4 className="font-semibold mb-1 flex items-center gap-1">
-                        <CheckCircle2 className="h-4 w-4" /> Application Checklist
+                        <CheckCircle className="h-4 w-4" /> Application Checklist
                       </h4>
                       <Button
                         variant="ghost"

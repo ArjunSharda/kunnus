@@ -36,6 +36,7 @@ import {
   Palette,
   FolderPlus,
   Home,
+  BarChart,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -1452,7 +1453,7 @@ export default function GrantFinder() {
 
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <BarChart3 className="h-4 w-4 mr-2" />
+                    <BarChart className="h-4 w-4 mr-2" />
                     Statistics
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
