@@ -133,7 +133,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
                     <Draggable key={grant.id} draggableId={grant.id} index={index}>
                       {(provided, snapshot) => (
                         <div
-                          ref={provided.innerRef}
+                          ref={provided.innerRef as React.RefObject<HTMLDivElement>}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className={cn(
