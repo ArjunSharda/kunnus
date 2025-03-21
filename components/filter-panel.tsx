@@ -180,6 +180,23 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
               </div>
             </div>
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="status-filter">Application Status</Label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger id="status-filter">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="notStarted">Not Started</SelectItem>
+                <SelectItem value="inProgress">In Progress</SelectItem>
+                <SelectItem value="submitted">Submitted</SelectItem>
+                <SelectItem value="awarded">Awarded</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </TabsContent>
 
