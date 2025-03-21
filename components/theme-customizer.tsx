@@ -12,6 +12,11 @@ interface ThemeCustomizerProps {
   onUpdate: (preferences: Partial<ThemePreference>) => void
 }
 
+// Add a type guard to ensure the primary color is valid
+const isPrimaryColor = (color: string): color is "purple" | "blue" | "green" | "red" => {
+  return ["purple", "blue", "green", "red"].includes(color);
+};
+
 export default function ThemeCustomizer({ preferences, onUpdate }: ThemeCustomizerProps) {
   // Color options
   const colorOptions = [
@@ -34,7 +39,11 @@ export default function ThemeCustomizer({ preferences, onUpdate }: ThemeCustomiz
                 "h-10 p-0 border-2",
                 preferences.primaryColor === option.value ? "border-primary" : "border-transparent",
               )}
-              onClick={() => onUpdate({ primaryColor: option.value })}
+              onClick={() => {
+                if (isPrimaryColor(option.value)) {
+                  onUpdate({ primaryColor: option.value });
+                }
+              }}
             >
               <div className="flex flex-col items-center justify-center w-full">
                 <div className={cn("w-6 h-6 rounded-full mb-1", option.color)}>
