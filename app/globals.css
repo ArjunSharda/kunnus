@@ -57,10 +57,6 @@
 @layer base {
   * {
     @apply border-[color:hsl(var(--border))];
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }
 
 @layer utilities {
