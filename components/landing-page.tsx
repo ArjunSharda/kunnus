@@ -300,7 +300,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 className="bg-card border rounded-xl p-6 relative"
               >
-                <div className="absolute -top-4 left-6 text-primary text-6xl opacity-20">"</div>
+                <div className="absolute -top-4 left-6 text-primary text-6xl opacity-20">&quot;</div>
                 <p className="text-lg mb-6 relative z-10">{testimonial.quote}</p>
                 <div>
                   <p className="font-semibold">{testimonial.author}</p>
