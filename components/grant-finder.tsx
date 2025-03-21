@@ -217,6 +217,12 @@ export default function GrantFinder() {
     )
   }, [themePreference]) // Add themePreference as a dependency
 
+  // Move toggleDarkMode definition here, before it's used in dependency arrays
+  const toggleDarkMode = useCallback(() => {
+    setIsDarkMode(!isDarkMode)
+    document.documentElement.classList.toggle("dark")
+  }, [isDarkMode])
+
   // Initialize data and load saved state
   useEffect(() => {
     setGrants(sampleGrants)
@@ -582,12 +588,6 @@ export default function GrantFinder() {
       duration: 3000,
     })
   }
-
-  // Toggle dark mode
-  const toggleDarkMode = useCallback(() => {
-    setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle("dark")
-  }, [isDarkMode]) // Add isDarkMode as a dependency
 
   // Export bookmarked grants as CSV
   const exportBookmarkedGrants = (format: "csv" | "pdf") => {
