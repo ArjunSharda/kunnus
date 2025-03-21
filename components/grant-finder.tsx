@@ -630,7 +630,8 @@ export default function GrantFinder() {
     }
 
     if (filters.schoolType && filters.schoolType !== "all") {
-      filtered = filtered.filter((grant) => grant.eligibility.includes(filters.schoolType))
+      // Fix the type error by adding the non-null assertion (!) since we already checked it's not null above
+      filtered = filtered.filter((grant) => grant.eligibility.includes(filters.schoolType!))
     }
 
     if (filters.minAmount) {
