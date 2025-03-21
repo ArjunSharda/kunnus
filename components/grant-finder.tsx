@@ -444,7 +444,7 @@ export default function GrantFinder() {
   }, [grants, bookmarkedGrants, notificationsEnabled, toast])
 
   // Sort grants based on selected sort option
-  const sortGrants = (grantsToSort: Grant[]) => {
+  const sortGrants = useCallback((grantsToSort: Grant[]) => {
     return [...grantsToSort].sort((a, b) => {
       switch (sortOption) {
         case "deadline-asc":
@@ -463,7 +463,7 @@ export default function GrantFinder() {
           return 0
       }
     })
-  }
+  }, [sortOption]);
 
   // Filter grants based on search query, active tab, and folder
   useEffect(() => {

@@ -1,8 +1,12 @@
 declare module 'react-beautiful-dnd' {
-  // Using Record<string, unknown> instead of any
-  export const DragDropContext: any;
-  export const Droppable: any;
-  export const Draggable: any;
+  import React from 'react';
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export const DragDropContext: React.ComponentType<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export const Droppable: React.ComponentType<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export const Draggable: React.ComponentType<any>;
   
   export interface DropResult {
     destination: {
