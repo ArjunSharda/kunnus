@@ -12,9 +12,17 @@ interface ThemeCustomizerProps {
   onUpdate: (preferences: Partial<ThemePreference>) => void
 }
 
-// Add a type guard to ensure the primary color is valid
+// Add type guards to ensure values are valid
 const isPrimaryColor = (color: string): color is "purple" | "blue" | "green" | "red" => {
   return ["purple", "blue", "green", "red"].includes(color);
+};
+
+const isBorderRadius = (radius: string): radius is "none" | "small" | "medium" | "large" => {
+  return ["none", "small", "medium", "large"].includes(radius);
+};
+
+const isAnimationSpeed = (speed: string): speed is "none" | "slow" | "medium" | "fast" => {
+  return ["none", "slow", "medium", "fast"].includes(speed);
 };
 
 export default function ThemeCustomizer({ preferences, onUpdate }: ThemeCustomizerProps) {
@@ -60,7 +68,11 @@ export default function ThemeCustomizer({ preferences, onUpdate }: ThemeCustomiz
         <Label>Border Radius</Label>
         <RadioGroup
           value={preferences.borderRadius}
-          onValueChange={(value) => onUpdate({ borderRadius: value })}
+          onValueChange={(value) => {
+            if (isBorderRadius(value)) {
+              onUpdate({ borderRadius: value });
+            }
+          }}
           className="grid grid-cols-4 gap-2"
         >
           <div>
@@ -122,7 +134,11 @@ export default function ThemeCustomizer({ preferences, onUpdate }: ThemeCustomiz
         <Label>Animation Speed</Label>
         <RadioGroup
           value={preferences.animation}
-          onValueChange={(value) => onUpdate({ animation: value })}
+          onValueChange={(value) => {
+            if (isAnimationSpeed(value)) {
+              onUpdate({ animation: value });
+            }
+          }}
           className="grid grid-cols-4 gap-2"
         >
           <div>
