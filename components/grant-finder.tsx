@@ -67,7 +67,7 @@ import {
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/hooks/use-toast"
 import GrantCard from "./grant-card"
 import FilterPanel from "./filter-panel"
 import KeyboardShortcutsHelp from "./keyboard-shortcuts-help"
