@@ -353,51 +353,6 @@ export default function GrantFinder() {
     toggleDarkMode
   ])
 
-  // Apply theme preferences
-  const applyThemePreferences = useCallback(() => {
-    // Apply primary color
-    document.documentElement.style.setProperty(
-      "--primary-hue",
-      themePreference.primaryColor === "purple"
-        ? "262"
-        : themePreference.primaryColor === "blue"
-          ? "220"
-          : themePreference.primaryColor === "green"
-            ? "142"
-            : themePreference.primaryColor === "red"
-              ? "0"
-              : "262",
-    )
-
-    // Apply border radius
-    document.documentElement.style.setProperty(
-      "--radius-factor",
-      themePreference.borderRadius === "small"
-        ? "0.375"
-        : themePreference.borderRadius === "medium"
-          ? "0.75"
-          : themePreference.borderRadius === "large"
-            ? "1.5"
-            : themePreference.borderRadius === "none"
-              ? "0"
-              : "0.75",
-    )
-
-    // Apply animation speed
-    document.documentElement.style.setProperty(
-      "--animation-factor",
-      themePreference.animation === "none"
-        ? "0"
-        : themePreference.animation === "slow"
-          ? "0.5"
-          : themePreference.animation === "medium"
-            ? "0.3"
-            : themePreference.animation === "fast"
-              ? "0.15"
-              : "0.3",
-    )
-  }, [themePreference]) // Add themePreference as a dependency
-
   // Save state to localStorage when it changes
   useEffect(() => {
     localStorage.setItem("bookmarkedGrants", JSON.stringify(bookmarkedGrants))
