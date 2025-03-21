@@ -7,43 +7,21 @@ import { Card } from "@/components/ui/card"
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useState, useEffect, useMemo, useCallback } from "react"
-import {
-  Search,
-  Filter,
-  Bookmark,
-  BookmarkCheck,
-  Moon,
-  Sun,
-  Info,
-  Download,
-  Bell,
-  BellOff,
-  Keyboard,
-  Calendar,
-  Map,
-  BarChart3,
-  Grid,
-  List,
-  Columns,
-  Settings,
-  Share2,
-  Printer,
-  Save,
-  Layers,
-  ChevronLeft,
-  ChevronRight,
-  SlidersHorizontal,
-  Palette,
-  FolderPlus,
-  Home,
-  BarChart,
-} from "lucide-react"
+import { Search, Filter, Bookmark, BookmarkCheck, Moon, Sun, Info, Download, Bell, BellOff, Keyboard, Calendar, Map, Grid, List, Columns, Settings, Share2, Printer, Save, Layers, ChevronLeft, ChevronRight, SlidersHorizontal, Palette, FolderPlus, Home, BarChart } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Pagination } from "@/components/ui/pagination"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationEllipsis,
+  PaginationPrevious,
+  PaginationNext
+} from "@/components/ui/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
@@ -99,15 +77,15 @@ const ITEMS_PER_PAGE = 9
 
 // Define a proper type for filters
 interface FilterOptions {
-  category?: string;
-  schoolType?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  deadlineDays?: number | null;
-  hideExpired?: boolean;
-  bookmarkedOnly?: boolean;
-  urgentOnly?: boolean;
-  statusFilter?: string;
+  category?: string
+  schoolType?: string
+  minAmount?: number
+  maxAmount?: number
+  deadlineDays?: number | null
+  hideExpired?: boolean
+  bookmarkedOnly?: boolean
+  urgentOnly?: boolean
+  statusFilter?: string
 }
 
 export default function GrantFinder() {
@@ -174,17 +152,17 @@ export default function GrantFinder() {
   }
 
   // Define applyThemePreferences function here, before it's used in any arrays
-  const applyThemePreferences = useCallback(() => {
+  const applyThemePreferences = useCallback((preferences = themePreference) => {
     // Apply primary color
     document.documentElement.style.setProperty(
       "--primary-hue",
-      themePreference.primaryColor === "purple"
+      preferences.primaryColor === "purple"
         ? "262"
-        : themePreference.primaryColor === "blue"
+        : preferences.primaryColor === "blue"
           ? "220"
-          : themePreference.primaryColor === "green"
+          : preferences.primaryColor === "green"
             ? "142"
-            : themePreference.primaryColor === "red"
+            : preferences.primaryColor === "red"
               ? "0"
               : "262",
     )
@@ -192,13 +170,13 @@ export default function GrantFinder() {
     // Apply border radius
     document.documentElement.style.setProperty(
       "--radius-factor",
-      themePreference.borderRadius === "small"
+      preferences.borderRadius === "small"
         ? "0.375"
-        : themePreference.borderRadius === "medium"
+        : preferences.borderRadius === "medium"
           ? "0.75"
-          : themePreference.borderRadius === "large"
+          : preferences.borderRadius === "large"
             ? "1.5"
-            : themePreference.borderRadius === "none"
+            : preferences.borderRadius === "none"
               ? "0"
               : "0.75",
     )
@@ -206,23 +184,23 @@ export default function GrantFinder() {
     // Apply animation speed
     document.documentElement.style.setProperty(
       "--animation-factor",
-      themePreference.animation === "none"
+      preferences.animation === "none"
         ? "0"
-        : themePreference.animation === "slow"
+        : preferences.animation === "slow"
           ? "0.5"
-          : themePreference.animation === "medium"
+          : preferences.animation === "medium"
             ? "0.3"
-            : themePreference.animation === "fast"
+            : preferences.animation === "fast"
               ? "0.15"
               : "0.3",
     )
-  }, [themePreference]) // Add themePreference as a dependency
+  }, [])
 
   // Move toggleDarkMode definition here, before it's used in dependency arrays
   const toggleDarkMode = useCallback(() => {
-    setIsDarkMode(!isDarkMode)
+    setIsDarkMode(prev => !prev)
     document.documentElement.classList.toggle("dark")
-  }, [isDarkMode])
+  }, [])
 
   // Initialize data and load saved state
   useEffect(() => {
@@ -304,7 +282,7 @@ export default function GrantFinder() {
     }
 
     // Apply theme preferences
-    applyThemePreferences()
+    applyThemePreferences(themePreference)
 
     // Set up keyboard shortcuts
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -352,13 +330,9 @@ export default function GrantFinder() {
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [
-    currentPage, 
-    totalPages, 
-    setCurrentPage, 
-    setViewMode, 
-    applyThemePreferences, 
-    toggleDarkMode
-  ])
+  currentPage, 
+  totalPages
+])
 
   // Save state to localStorage when it changes
   useEffect(() => {
@@ -404,7 +378,7 @@ export default function GrantFinder() {
 
   useEffect(() => {
     localStorage.setItem("themePreference", JSON.stringify(themePreference))
-    applyThemePreferences()
+    applyThemePreferences(themePreference)
   }, [themePreference, applyThemePreferences])
 
   useEffect(() => {
@@ -445,26 +419,29 @@ export default function GrantFinder() {
   }, [grants, bookmarkedGrants, notificationsEnabled, toast])
 
   // Sort grants based on selected sort option
-  const sortGrants = useCallback((grantsToSort: Grant[]) => {
-    return [...grantsToSort].sort((a, b) => {
-      switch (sortOption) {
-        case "deadline-asc":
-          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
-        case "deadline-desc":
-          return new Date(b.deadline).getTime() - new Date(a.deadline).getTime()
-        case "amount-asc":
-          return a.amount - b.amount
-        case "amount-desc":
-          return b.amount - a.amount
-        case "title-asc":
-          return a.title.localeCompare(b.title)
-        case "title-desc":
-          return b.title.localeCompare(a.title)
-        default:
-          return 0
-      }
-    })
-  }, [sortOption]);
+  const sortGrants = useCallback(
+    (grantsToSort: Grant[]) => {
+      return [...grantsToSort].sort((a, b) => {
+        switch (sortOption) {
+          case "deadline-asc":
+            return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+          case "deadline-desc":
+            return new Date(b.deadline).getTime() - new Date(a.deadline).getTime()
+          case "amount-asc":
+            return a.amount - b.amount
+          case "amount-desc":
+            return b.amount - a.amount
+          case "title-asc":
+            return a.title.localeCompare(b.title)
+          case "title-desc":
+            return b.title.localeCompare(a.title)
+          default:
+            return 0
+        }
+      })
+    },
+    [sortOption],
+  )
 
   // Filter grants based on search query, active tab, and folder
   useEffect(() => {
@@ -969,6 +946,13 @@ export default function GrantFinder() {
           <Button
             variant="outline"
             size="icon"
+          >
+            <span className="sr-only">Next page</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage === totalPages}
             className="hidden sm:flex"
@@ -1437,7 +1421,10 @@ export default function GrantFinder() {
                 <DropdownMenuSeparator />
 
                 <DropdownMenuLabel>Card Size</DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={cardSize} onValueChange={(value) => setCardSize(value as "compact" | "normal" | "detailed")}>
+                <DropdownMenuRadioGroup
+                  value={cardSize}
+                  onValueChange={(value) => setCardSize(value as "compact" | "normal" | "detailed")}
+                >
                   <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="normal">Normal</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="detailed">Detailed</DropdownMenuRadioItem>
