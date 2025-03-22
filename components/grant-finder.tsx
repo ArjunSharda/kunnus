@@ -1409,20 +1409,13 @@ export default function GrantFinder() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Palette className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Customize Theme</SheetTitle>
-                  <SheetDescription>Personalize the appearance of Grant Finder</SheetDescription>
-                </SheetHeader>
-                <ThemeCustomizer preferences={themePreference} onUpdate={updateThemePreference} />
-              </SheetContent>
-            </Sheet>
+            {/* Replace with direct use of ThemeCustomizer with appropriate styling */}
+            <ThemeCustomizer 
+              preferences={themePreference} 
+              onUpdate={updateThemePreference} 
+              variant="ghost" 
+              size="icon"
+            />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

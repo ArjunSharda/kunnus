@@ -244,12 +244,3 @@ export const generatePDF = (grants: Grant[], statuses: Record<string, Applicatio
   doc.save("grant-finder-export.pdf")
 }
 
-// Helper function to format date if not already in utils.ts
-function formatDate(date: Date): string {
-   return date.toLocaleDateString('en-US', {
-   year: 'numeric',
-   month: 'long',
-   day: 'numeric'
-   })
- }
-
