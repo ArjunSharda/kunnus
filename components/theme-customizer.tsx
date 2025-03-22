@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Check, X, Palette, Sparkles, Radius, Save } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -29,7 +29,8 @@ const isBorderRadius = (radius: string): radius is "none" | "small" | "medium" |
   return ["none", "small", "medium", "large"].includes(radius)
 }
 
-const isAnimationSpeed = (speed: string): boolean => {
+// Update the isAnimationSpeed to be a proper type guard
+const isAnimationSpeed = (speed: string): speed is "none" | "slow" | "medium" | "fast" => {
   return ["none", "slow", "medium", "fast"].includes(speed)
 }
 
@@ -183,9 +184,11 @@ export default function ThemeCustomizer({
                     </div>
                     {localPreferences.primaryColor === option.value && (
                       <motion.div
-                        layoutId="selectedColor"
+
                         className="absolute inset-0 border-2 border-primary rounded-md"
                         transition={{ type: "spring", duration: 0.5 }}
+                        animate={{ opacity: 1 }}
+                        initial={{ opacity: 0 }}
                       />
                     )}
                   </Button>
@@ -369,30 +372,27 @@ export default function ThemeCustomizer({
               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Preview</div>
                 <div className="mt-2 flex justify-center p-4">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={localPreferences.animation}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{
-                        duration:
-                          localPreferences.animation === "slow"
-                            ? 1
-                            : localPreferences.animation === "medium"
-                              ? 0.5
-                              : localPreferences.animation === "fast"
-                                ? 0.3
-                                : 0,
-                      }}
-                      className={cn(
-                        "w-16 h-16 bg-primary rounded-md flex items-center justify-center",
-                        getAnimationDuration(localPreferences.animation),
-                      )}
-                    >
-                      <Sparkles className="h-8 w-8 text-primary-foreground" />
-                    </motion.div>
-                  </AnimatePresence>
+                  <motion.div
+                    key={localPreferences.animation}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration:
+                        localPreferences.animation === "slow"
+                          ? 1
+                          : localPreferences.animation === "medium"
+                            ? 0.5
+                            : localPreferences.animation === "fast"
+                              ? 0.3
+                              : 0,
+                    }}
+                    className={cn(
+                      "w-16 h-16 bg-primary rounded-md flex items-center justify-center",
+                      getAnimationDuration(localPreferences.animation),
+                    )}
+                  >
+                    <Sparkles className="h-8 w-8 text-primary-foreground" />
+                  </motion.div>
                 </div>
               </div>
             </div>
