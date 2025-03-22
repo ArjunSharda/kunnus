@@ -32,7 +32,7 @@ export default function LandingPage() {
         <div className="container flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Award className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl">GrantFinder</span>
+            <span className="font-bold text-xl">Kunnus</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">
@@ -63,7 +63,7 @@ export default function LandingPage() {
             <div>
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-                  Discover <span className="text-primary">Educational Grants</span> That Fuel Your Classroom
+                  Discover <span className="text-primary">Educational Grants</span> That Fuel Classrooms
                 </h1>
                 <p className="text-xl text-muted-foreground mb-8 max-w-lg">
                   Find, track, and apply for grants designed specifically for educators. Never miss an opportunity to
@@ -208,7 +208,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-20 bg-muted/30">
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How GrantFinder Works</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">How Kunnus Works</h2>
             <p className="text-xl text-muted-foreground">
               A simple three-step process to find and secure funding for your educational initiatives.
             </p>
@@ -269,13 +269,13 @@ export default function LandingPage() {
             {[
               {
                 quote:
-                  "GrantFinder helped me secure $5,000 for my classroom STEM project. The process was incredibly straightforward.",
+                  "Kunnus helped me secure $5,000 for my classroom STEM project. The process was incredibly straightforward.",
                 author: "Sarah Johnson",
                 role: "5th Grade Teacher, Lincoln Elementary",
               },
               {
                 quote:
-                  "As a principal, I've recommended GrantFinder to all our teachers. We've seen a 300% increase in grant funding this year alone.",
+                  "As a principal, I've recommended Kunnus to all our teachers. We've seen a 300% increase in grant funding this year alone.",
                 author: "Michael Rodriguez",
                 role: "Principal, Washington High School",
               },
@@ -341,7 +341,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
               <Award className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">GrantFinder</span>
+              <span className="font-bold text-lg">Kunnus</span>
             </div>
             <div className="flex gap-8">
               <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -356,7 +356,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>© {new Date().getFullYear()} GrantFinder. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Kunnus. All rights reserved.</p>
           </div>
         </div>
       </footer>

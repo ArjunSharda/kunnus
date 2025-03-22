@@ -867,7 +867,7 @@ export default function GrantFinder() {
     if (navigator.share) {
       navigator
         .share({
-          title: "Grant Finder - Shared Grants",
+          title: "Kunnus - Shared Grants",
           text: "Check out these education grants I found!",
           url: window.location.href,
         })
@@ -1293,7 +1293,7 @@ export default function GrantFinder() {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-4">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              Grant Finder
+              Kunnus
             </h1>
             {!showDashboard && (
               <Button variant="outline" size="sm" onClick={() => setShowDashboard(true)}>

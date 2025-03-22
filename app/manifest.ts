@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next"
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   return {
-    name: "Educator Grant Finder",
-    short_name: "Grant Finder",
+    name: "Kunnus",
+    short_name: "Kunnus",
     description: "Discover and track grants for educators",
     start_url: "/",
     display: "standalone",
