@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { DragDropContext, Droppable, Draggable, type DropResult } from "react-beautiful-dnd"
+import { useState, useEffect } from "react"
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 import { Badge } from "@/components/ui/badge"
 import type { Grant, ApplicationStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -13,6 +13,13 @@ interface GrantKanbanBoardProps {
 }
 
 export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: GrantKanbanBoardProps) {
+  // Add client-side only rendering to avoid hydration issues
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Group grants by status
   const [columns, setColumns] = useState<Record<ApplicationStatus, Grant[]>>(() => {
     const initialColumns: Record<ApplicationStatus, Grant[]> = {
@@ -31,8 +38,26 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
     return initialColumns
   })
 
+  // Update columns when grants or statuses change
+  useEffect(() => {
+    const updatedColumns: Record<ApplicationStatus, Grant[]> = {
+      "Not Started": [],
+      "In Progress": [],
+      Applied: [],
+      Awarded: [],
+      Rejected: [],
+    }
+
+    grants.forEach((grant) => {
+      const status = statuses[grant.id] || "Not Started"
+      updatedColumns[status].push(grant)
+    })
+
+    setColumns(updatedColumns)
+  }, [grants, statuses])
+
   // Handle drag end
-  const handleDragEnd = (result: DropResult) => {
+  const handleDragEnd = (result: any) => {
     const { source, destination } = result
 
     // Dropped outside the list
@@ -106,6 +131,27 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
     }
   }
 
+  // Don't render until client-side to avoid hydration issues
+  if (!mounted) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {Object.entries(columns).map(([status, grantsInColumn]) => (
+          <div key={status} className="flex flex-col h-full">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-medium text-sm">{status}</h3>
+              <Badge className={cn("px-2 py-1 text-xs", getBadgeColor(status as ApplicationStatus))}>
+                {grantsInColumn.length}
+              </Badge>
+            </div>
+            <div className={cn("flex-1 p-2 rounded-md min-h-[500px]", getColumnColor(status as ApplicationStatus))}>
+              <div className="text-center py-4 text-muted-foreground text-sm">Loading...</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -118,10 +164,10 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
               </Badge>
             </div>
 
-            <Droppable droppableId={status}>
+            <Droppable droppableId={String(status)}>
               {(provided, snapshot) => (
                 <div
-                  ref={provided.innerRef as React.RefObject<HTMLDivElement>}
+                  ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={cn(
                     "flex-1 p-2 rounded-md min-h-[500px]",
@@ -130,10 +176,10 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
                   )}
                 >
                   {grantsInColumn.map((grant, index) => (
-                    <Draggable key={grant.id} draggableId={grant.id} index={index}>
+                    <Draggable key={grant.id} draggableId={String(grant.id)} index={index}>
                       {(provided, snapshot) => (
                         <div
-                          ref={provided.innerRef as React.RefObject<HTMLDivElement>}
+                          ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className={cn(
@@ -161,7 +207,23 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
                   {provided.placeholder}
 
                   {grantsInColumn.length === 0 && (
-                    <div className="text-center py-4 text-muted-foreground text-sm">Drag grants here</div>
+                    <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+                      <div className="mb-2 text-2xl opacity-50">
+                        {status === "Not Started" && "📋"}
+                        {status === "In Progress" && "🔄"}
+                        {status === "Applied" && "📤"}
+                        {status === "Awarded" && "🏆"}
+                        {status === "Rejected" && "📝"}
+                      </div>
+                      <p className="text-sm font-medium">No grants here</p>
+                      <p className="text-xs mt-1">
+                        {status === "Not Started" && "Drag grants here to start tracking"}
+                        {status === "In Progress" && "Move grants here when you're working on applications"}
+                        {status === "Applied" && "Move grants here after submitting applications"}
+                        {status === "Awarded" && "Celebrate your successful applications here"}
+                        {status === "Rejected" && "Learn from application feedback here"}
+                      </p>
+                    </div>
                   )}
                 </div>
               )}
