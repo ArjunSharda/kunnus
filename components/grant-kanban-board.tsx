@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
+import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd"
 import { Badge } from "@/components/ui/badge"
 import type { Grant, ApplicationStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -57,7 +57,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
   }, [grants, statuses])
 
   // Handle drag end
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result
 
     // Dropped outside the list
@@ -131,7 +131,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
     }
   }
 
-  // Don't render until client-side to avoid hydration issues
+  // Don't render the DragDropContext until client-side to avoid hydration issues
   if (!mounted) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -164,7 +164,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
               </Badge>
             </div>
 
-            <Droppable droppableId={String(status)}>
+            <Droppable droppableId={status}>
               {(provided, snapshot) => (
                 <div
                   ref={provided.innerRef}
@@ -176,7 +176,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
                   )}
                 >
                   {grantsInColumn.map((grant, index) => (
-                    <Draggable key={grant.id} draggableId={String(grant.id)} index={index}>
+                    <Draggable key={grant.id} draggableId={grant.id} index={index}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
