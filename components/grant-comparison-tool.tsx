@@ -13,8 +13,7 @@ interface GrantComparisonToolProps {
 }
 
 export default function GrantComparisonTool({ grants, statuses }: GrantComparisonToolProps) {
-  // Get status color
-  const getStatusColor = (status: ApplicationStatus) => {
+    const getStatusColor = (status: ApplicationStatus) => {
     switch (status) {
       case "Not Started":
         return "bg-gray-200 dark:bg-gray-700"
@@ -31,8 +30,7 @@ export default function GrantComparisonTool({ grants, statuses }: GrantCompariso
     }
   }
 
-  // Calculate days until deadline
-  const getDaysUntilDeadline = (deadline: string) => {
+    const getDaysUntilDeadline = (deadline: string) => {
     const today = new Date()
     const deadlineDate = new Date(deadline)
     const diffTime = deadlineDate.getTime() - today.getTime()
@@ -40,14 +38,12 @@ export default function GrantComparisonTool({ grants, statuses }: GrantCompariso
     return diffDays
   }
 
-  // Check if a deadline is urgent
-  const isDeadlineUrgent = (deadline: string) => {
+    const isDeadlineUrgent = (deadline: string) => {
     const daysUntil = getDaysUntilDeadline(deadline)
     return daysUntil > 0 && daysUntil <= 7
   }
 
-  // Check if a deadline is past
-  const isDeadlinePast = (deadline: string) => {
+    const isDeadlinePast = (deadline: string) => {
     return getDaysUntilDeadline(deadline) < 0
   }
 

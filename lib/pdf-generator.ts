@@ -141,8 +141,7 @@ export const generatePDF = (grants: Grant[], statuses: Record<string, Applicatio
     },
   })
 
-  // Add detailed grant information
-  let yPosition = doc.lastAutoTable.finalY + 15
+    let yPosition = doc.lastAutoTable.finalY + 15
 
   grants.forEach((grant, index) => {
     const status = statuses[grant.id] || "Not Started"

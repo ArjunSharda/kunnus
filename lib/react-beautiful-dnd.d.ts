@@ -1,8 +1,7 @@
 declare module 'react-beautiful-dnd' {
   import React from 'react';
   
-  // DroppableProvided interface
-  export interface DroppableProvided {
+    export interface DroppableProvided {
     innerRef: React.RefObject<HTMLElement>;
     droppableProps: {
       [key: string]: any;
@@ -10,15 +9,13 @@ declare module 'react-beautiful-dnd' {
     placeholder?: React.ReactElement | null;
   }
 
-  // DroppableStateSnapshot interface
-  export interface DroppableStateSnapshot {
+    export interface DroppableStateSnapshot {
     isDraggingOver: boolean;
     draggingOverWith?: string;
     draggingFromThisWith?: string;
   }
 
-  // DraggableProvided interface
-  export interface DraggableProvided {
+    export interface DraggableProvided {
     innerRef: React.RefObject<HTMLElement>;
     draggableProps: {
       [key: string]: any;
@@ -28,8 +25,7 @@ declare module 'react-beautiful-dnd' {
     } | null;
   }
 
-  // DraggableStateSnapshot interface
-  export interface DraggableStateSnapshot {
+    export interface DraggableStateSnapshot {
     isDragging: boolean;
     isDropAnimating: boolean;
     dropAnimation?: {
@@ -46,8 +42,7 @@ declare module 'react-beautiful-dnd' {
     mode?: 'FLUID' | 'SNAP';
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export const DragDropContext: React.ComponentType<any>;
+    export const DragDropContext: React.ComponentType<any>;
   
   export interface DroppableProps {
     droppableId: string;

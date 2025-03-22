@@ -16,15 +16,13 @@ interface CustomizeDashboardProps {
 export default function CustomizeDashboard({ widgets, onUpdate }: CustomizeDashboardProps) {
   const [localWidgets, setLocalWidgets] = useState<DashboardWidget[]>(widgets)
 
-  // Toggle widget enabled state
-  const toggleWidget = (id: string) => {
+    const toggleWidget = (id: string) => {
     setLocalWidgets((prev) =>
       prev.map((widget) => (widget.id === id ? { ...widget, enabled: !widget.enabled } : widget)),
     )
   }
 
-  // Move widget up in the list
-  const moveWidgetUp = (index: number) => {
+    const moveWidgetUp = (index: number) => {
     if (index === 0) return
 
     const newWidgets = [...localWidgets]
@@ -35,8 +33,7 @@ export default function CustomizeDashboard({ widgets, onUpdate }: CustomizeDashb
     setLocalWidgets(newWidgets)
   }
 
-  // Move widget down in the list
-  const moveWidgetDown = (index: number) => {
+    const moveWidgetDown = (index: number) => {
     if (index === localWidgets.length - 1) return
 
     const newWidgets = [...localWidgets]
@@ -47,8 +44,7 @@ export default function CustomizeDashboard({ widgets, onUpdate }: CustomizeDashb
     setLocalWidgets(newWidgets)
   }
 
-  // Save changes
-  const saveChanges = () => {
+    const saveChanges = () => {
     onUpdate(localWidgets)
   }
 

@@ -135,8 +135,7 @@ export default function GrantCard({
     return Math.round((completed / total) * 100)
   }
 
-  // Calculate days until deadline
-  const getDaysUntilDeadline = () => {
+    const getDaysUntilDeadline = () => {
     const today = new Date()
     const deadlineDate = new Date(grant.deadline)
     const diffTime = deadlineDate.getTime() - today.getTime()
@@ -148,8 +147,7 @@ export default function GrantCard({
   const isUrgent = daysUntilDeadline > 0 && daysUntilDeadline <= 7
   const isPast = daysUntilDeadline < 0
 
-  // Add a mock attachment
-  const addAttachment = () => {
+    const addAttachment = () => {
     const newAttachment = {
       name: `Document-${Math.floor(Math.random() * 1000)}.pdf`,
       url: "#",
@@ -159,16 +157,14 @@ export default function GrantCard({
     localStorage.setItem(`grant-attachments-${grant.id}`, JSON.stringify(updatedAttachments))
   }
 
-  // Remove an attachment
-  const removeAttachment = (index: number) => {
+    const removeAttachment = (index: number) => {
     const updatedAttachments = [...attachments]
     updatedAttachments.splice(index, 1)
     setAttachments(updatedAttachments)
     localStorage.setItem(`grant-attachments-${grant.id}`, JSON.stringify(updatedAttachments))
   }
 
-  // Share grant
-  const shareGrant = () => {
+    const shareGrant = () => {
     if (navigator.share) {
       navigator.share({
         title: grant.title,
@@ -181,8 +177,7 @@ export default function GrantCard({
     }
   }
 
-  // Render compact card
-  if (size === "compact") {
+    if (size === "compact") {
     return (
       <Card
         className={cn(
@@ -242,8 +237,7 @@ export default function GrantCard({
     )
   }
 
-  // Render detailed or normal card
-  return (
+    return (
     <Card
       className={cn(
         "transition-all duration-300 hover:shadow-lg",

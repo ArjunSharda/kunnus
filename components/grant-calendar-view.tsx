@@ -19,43 +19,32 @@ export default function GrantCalendarView({ grants, bookmarkedGrants, statuses }
   const [calendarDays, setCalendarDays] = useState<Date[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
-  // Generate calendar days for the current month
-  useEffect(() => {
+    useEffect(() => {
     const year = currentDate.getFullYear()
     const month = currentDate.getMonth()
 
-    // Get the first day of the month
-    const firstDay = new Date(year, month, 1)
-    // Get the last day of the month
-    const lastDay = new Date(year, month + 1, 0)
+        const firstDay = new Date(year, month, 1)
+        const lastDay = new Date(year, month + 1, 0)
 
-    // Get the day of the week for the first day (0 = Sunday, 6 = Saturday)
-    const firstDayOfWeek = firstDay.getDay()
+        const firstDayOfWeek = firstDay.getDay()
 
-    // Calculate the number of days to show from the previous month
-    const daysFromPrevMonth = firstDayOfWeek
+        const daysFromPrevMonth = firstDayOfWeek
 
-    // Calculate the total number of days to show (previous month + current month + next month)
-    const totalDays = 42 // 6 rows of 7 days
+        const totalDays = 42 
+        const days: Date[] = []
 
-    // Generate the array of dates
-    const days: Date[] = []
-
-    // Add days from the previous month
-    const prevMonth = new Date(year, month, 0)
+        const prevMonth = new Date(year, month, 0)
     const prevMonthDays = prevMonth.getDate()
 
     for (let i = prevMonthDays - daysFromPrevMonth + 1; i <= prevMonthDays; i++) {
       days.push(new Date(year, month - 1, i))
     }
 
-    // Add days from the current month
-    for (let i = 1; i <= lastDay.getDate(); i++) {
+        for (let i = 1; i <= lastDay.getDate(); i++) {
       days.push(new Date(year, month, i))
     }
 
-    // Add days from the next month
-    const remainingDays = totalDays - days.length
+        const remainingDays = totalDays - days.length
     for (let i = 1; i <= remainingDays; i++) {
       days.push(new Date(year, month + 1, i))
     }
@@ -63,23 +52,19 @@ export default function GrantCalendarView({ grants, bookmarkedGrants, statuses }
     setCalendarDays(days)
   }, [currentDate])
 
-  // Navigate to the previous month
-  const goToPreviousMonth = () => {
+    const goToPreviousMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
   }
 
-  // Navigate to the next month
-  const goToNextMonth = () => {
+    const goToNextMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
   }
 
-  // Navigate to the current month
-  const goToCurrentMonth = () => {
+    const goToCurrentMonth = () => {
     setCurrentDate(new Date())
   }
 
-  // Get grants for a specific date
-  const getGrantsForDate = (date: Date) => {
+    const getGrantsForDate = (date: Date) => {
     return grants.filter((grant) => {
       const deadlineDate = new Date(grant.deadline)
       return (
@@ -90,21 +75,17 @@ export default function GrantCalendarView({ grants, bookmarkedGrants, statuses }
     })
   }
 
-  // Check if a date has grants
-  const hasGrantsForDate = (date: Date) => {
+    const hasGrantsForDate = (date: Date) => {
     return getGrantsForDate(date).length > 0
   }
 
-  // Check if a date has bookmarked grants
-  const hasBookmarkedGrantsForDate = (date: Date) => {
+    const hasBookmarkedGrantsForDate = (date: Date) => {
     return getGrantsForDate(date).some((grant) => bookmarkedGrants.includes(grant.id))
   }
 
-  // Get the day of the week names
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-  // Get the month and year for the header
-  const monthYearString = currentDate.toLocaleString("default", { month: "long", year: "numeric" })
+    const monthYearString = currentDate.toLocaleString("default", { month: "long", year: "numeric" })
 
   return (
     <div className="space-y-4">

@@ -93,10 +93,8 @@ import { generatePDF } from "@/lib/pdf-generator"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 
-// Number of grants to show per page
 const ITEMS_PER_PAGE = 9
 
-// Define a proper type for filters
 interface FilterOptions {
   category?: string
   schoolType?: string
@@ -152,29 +150,24 @@ export default function GrantFinder() {
     }[]
   >([])
 
-  // Calculate total pages based on filtered grants
   const totalPages = Math.ceil(filteredGrants.length / ITEMS_PER_PAGE)
 
-  // Get current page of grants
   const currentGrants = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
     return filteredGrants.slice(startIndex, startIndex + ITEMS_PER_PAGE)
   }, [filteredGrants, currentPage])
 
-  // Track recent activity
   const addActivity = (action: string, grantId: string) => {
     const newActivity = {
       action,
       grantId,
       timestamp: Date.now(),
     }
-    setRecentActivity((prev) => [newActivity, ...prev].slice(0, 20)) // Keep only last 20 activities
+    setRecentActivity((prev) => [newActivity, ...prev].slice(0, 20))
     localStorage.setItem("recentActivity", JSON.stringify([newActivity, ...recentActivity].slice(0, 20)))
   }
 
-  // Define applyThemePreferences function here, before it's used in any arrays
   const applyThemePreferences = useCallback((preferences = themePreference) => {
-    // Apply primary color
     document.documentElement.style.setProperty(
       "--primary-hue",
       preferences.primaryColor === "purple"
@@ -188,7 +181,6 @@ export default function GrantFinder() {
               : "262",
     )
 
-    // Apply border radius
     document.documentElement.style.setProperty(
       "--radius-factor",
       preferences.borderRadius === "small"
@@ -202,7 +194,6 @@ export default function GrantFinder() {
               : "0.75",
     )
 
-    // Apply animation speed
     document.documentElement.style.setProperty(
       "--animation-factor",
       preferences.animation === "none"
@@ -217,18 +208,15 @@ export default function GrantFinder() {
     )
   }, [])
 
-  // Move toggleDarkMode definition here, before it's used in dependency arrays
   const toggleDarkMode = useCallback(() => {
     setIsDarkMode((prev) => !prev)
     document.documentElement.classList.toggle("dark")
   }, [])
 
-  // Initialize data and load saved state
   useEffect(() => {
     setGrants(sampleGrants)
     setFilteredGrants(sampleGrants)
 
-    // Load saved state from localStorage
     const loadFromLocalStorage = () => {
       const savedBookmarks = localStorage.getItem("bookmarkedGrants")
       if (savedBookmarks) {
@@ -293,7 +281,6 @@ export default function GrantFinder() {
 
     loadFromLocalStorage()
 
-    // Check system preference for dark mode
     if (typeof window !== "undefined") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
       setIsDarkMode(prefersDark)
@@ -302,12 +289,9 @@ export default function GrantFinder() {
       }
     }
 
-    // Apply theme preferences
     applyThemePreferences(themePreference)
 
-    // Set up keyboard shortcuts
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only activate shortcuts if not in an input field
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return
       }
@@ -352,7 +336,6 @@ export default function GrantFinder() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [currentPage, totalPages])
 
-  // Save state to localStorage when it changes
   useEffect(() => {
     localStorage.setItem("bookmarkedGrants", JSON.stringify(bookmarkedGrants))
   }, [bookmarkedGrants])
@@ -403,7 +386,6 @@ export default function GrantFinder() {
     localStorage.setItem("cardSize", JSON.stringify(cardSize))
   }, [cardSize])
 
-  // Check for upcoming deadlines and show notifications
   useEffect(() => {
     if (!notificationsEnabled) return
 
@@ -428,15 +410,12 @@ export default function GrantFinder() {
       }
     }
 
-    // Check once when component mounts
     checkDeadlines()
 
-    // Set up daily check
     const interval = setInterval(checkDeadlines, 24 * 60 * 60 * 1000)
     return () => clearInterval(interval)
   }, [grants, bookmarkedGrants, notificationsEnabled, toast])
 
-  // Sort grants based on selected sort option
   const sortGrants = useCallback(
     (grantsToSort: Grant[]) => {
       return [...grantsToSort].sort((a, b) => {
@@ -461,11 +440,9 @@ export default function GrantFinder() {
     [sortOption],
   )
 
-  // Filter grants based on search query, active tab, and folder
   useEffect(() => {
     let results = grants
 
-    // Apply search filter
     if (searchQuery) {
       results = results.filter(
         (grant) =>
@@ -476,7 +453,6 @@ export default function GrantFinder() {
       )
     }
 
-    // Filter by tab
     if (activeTab === "bookmarked") {
       if (activeFolder === "default") {
         results = results.filter((grant) => bookmarkedGrants.includes(grant.id))
@@ -488,14 +464,10 @@ export default function GrantFinder() {
       }
     }
 
-    // Sort results
     results = sortGrants(results)
 
-    // Only update filtered grants if we're not in the middle of applying filters
-    // This prevents the filter panel from being overridden by this effect
     if (!showFilters) {
       setFilteredGrants(results)
-      // Reset to first page when filters change
       setCurrentPage(1)
     }
   }, [
@@ -510,11 +482,9 @@ export default function GrantFinder() {
     showFilters,
   ])
 
-  // Toggle bookmark for a grant
   const toggleBookmark = (grantId: string) => {
     setBookmarkedGrants((prev) => {
       if (prev.includes(grantId)) {
-        // Remove from all folders
         setBookmarkFolders((folders) =>
           folders.map((folder) => ({
             ...folder,
@@ -537,7 +507,6 @@ export default function GrantFinder() {
     })
   }
 
-  // Update grant application status
   const updateGrantStatus = (grantId: string, status: ApplicationStatus) => {
     setGrantStatuses((prev) => ({
       ...prev,
@@ -553,7 +522,6 @@ export default function GrantFinder() {
     addActivity(`Updated status to ${status}`, grantId)
   }
 
-  // Add grant to folder
   const addGrantToFolder = (grantId: string, folderId: string) => {
     setBookmarkFolders((folders) =>
       folders.map((folder) => {
@@ -578,7 +546,6 @@ export default function GrantFinder() {
     addActivity(`Added to folder "${folderName}"`, grantId)
   }
 
-  // Create new folder
   const createNewFolder = () => {
     if (!newFolderName.trim()) return
 
@@ -598,7 +565,6 @@ export default function GrantFinder() {
     })
   }
 
-  // Export bookmarked grants as CSV
   const exportBookmarkedGrants = (format: "csv" | "pdf") => {
     const bookmarked = grants.filter((grant) => bookmarkedGrants.includes(grant.id))
 
@@ -630,10 +596,9 @@ export default function GrantFinder() {
     })
   }
 
-  // Apply filters from filter panel
   const applyFilters = (filters: FilterOptions) => {
-    console.log("Applying filters:", filters) // Add logging to debug
-    let filtered = [...grants] // Create a new array to avoid mutating the original
+    console.log("Applying filters:", filters) 
+    let filtered = [...grants]
 
     if (filters.category) {
       filtered = filtered.filter((grant) => grant.category === filters.category)
@@ -679,7 +644,7 @@ export default function GrantFinder() {
         const deadlineDate = new Date(grant.deadline)
         const diffTime = deadlineDate.getTime() - today.getTime()
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-        return diffDays > 0 && diffDays <= 7 // Urgent means within 7 days
+        return diffDays > 0 && diffDays <= 7
       })
     }
 
@@ -687,15 +652,14 @@ export default function GrantFinder() {
       filtered = filtered.filter((grant) => grantStatuses[grant.id] === filters.statusFilter)
     }
 
-    // Sort results
     filtered = sortGrants(filtered)
 
-    console.log("Filtered grants:", filtered.length) // Add logging to debug
+    console.log("Filtered grants:", filtered.length) 
     setFilteredGrants(filtered)
-    setCurrentPage(1) // Reset to first page
+    setCurrentPage(1)
   }
 
-  // Save current search and filters
+
   const saveCurrentSearch = (name: string) => {
     if (!name.trim()) return
 
@@ -703,7 +667,7 @@ export default function GrantFinder() {
       id: `search-${Date.now()}`,
       name,
       query: searchQuery,
-      filters: {}, // You would capture current filter state here
+      filters: {}, 
       timestamp: Date.now(),
     }
 
@@ -716,10 +680,10 @@ export default function GrantFinder() {
     })
   }
 
-  // Apply a saved search
+
   const applySavedSearch = (search: SavedSearch) => {
     setSearchQuery(search.query)
-    // Apply other filters from search.filters
+
 
     toast({
       title: "Search Applied",
@@ -728,7 +692,7 @@ export default function GrantFinder() {
     })
   }
 
-  // Toggle selection of a grant
+
   const toggleSelectGrant = (grantId: string) => {
     setSelectedGrants((prev) => {
       if (prev.includes(grantId)) {
@@ -739,7 +703,6 @@ export default function GrantFinder() {
     })
   }
 
-  // Select all grants on current page
   const selectAllOnPage = () => {
     if (selectedGrants.length === currentGrants.length) {
       setSelectedGrants([])
@@ -748,7 +711,6 @@ export default function GrantFinder() {
     }
   }
 
-  // Bulk actions for selected grants
   const performBulkAction = (
     action: "bookmark" | "unbookmark" | "export" | "compare" | "addToFolder",
     folderId?: string,
@@ -871,11 +833,9 @@ export default function GrantFinder() {
         break
     }
 
-    // Clear selection after action
     setSelectedGrants([])
   }
 
-  // Update dashboard widgets
   const updateDashboardWidgets = (widgets: DashboardWidget[]) => {
     setDashboardWidgets(widgets)
 
@@ -886,7 +846,6 @@ export default function GrantFinder() {
     })
   }
 
-  // Update theme preferences
   const updateThemePreference = (preference: Partial<ThemePreference>) => {
     setThemePreference((prev) => ({
       ...prev,
@@ -900,12 +859,10 @@ export default function GrantFinder() {
     })
   }
 
-  // Print current view
   const printCurrentView = () => {
     window.print()
   }
 
-  // Share via system share API if available
   const shareGrants = () => {
     if (navigator.share) {
       navigator
@@ -930,7 +887,6 @@ export default function GrantFinder() {
           })
         })
     } else {
-      // Fallback for browsers that don't support the Share API
       navigator.clipboard.writeText(window.location.href)
       toast({
         title: "Link Copied",
@@ -940,7 +896,6 @@ export default function GrantFinder() {
     }
   }
 
-  // Render pagination controls
   const renderPagination = () => {
     if (totalPages <= 1) return null
 
@@ -1003,7 +958,6 @@ export default function GrantFinder() {
     )
   }
 
-  // Render the appropriate view based on viewMode
   const renderGrantsView = () => {
     if (filteredGrants.length === 0) {
       return (
@@ -1776,4 +1730,3 @@ export default function GrantFinder() {
     </div>
   )
 }
-

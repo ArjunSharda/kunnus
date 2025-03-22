@@ -20,7 +20,6 @@ interface ThemeCustomizerProps {
   className?: string
 }
 
-// Add type guards to ensure values are valid
 const isPrimaryColor = (color: string): color is "purple" | "blue" | "green" | "red" => {
   return ["purple", "blue", "green", "red"].includes(color)
 }
@@ -29,7 +28,6 @@ const isBorderRadius = (radius: string): radius is "none" | "small" | "medium" |
   return ["none", "small", "medium", "large"].includes(radius)
 }
 
-// Update the isAnimationSpeed to be a proper type guard
 const isAnimationSpeed = (speed: string): speed is "none" | "slow" | "medium" | "fast" => {
   return ["none", "slow", "medium", "fast"].includes(speed)
 }
@@ -46,21 +44,18 @@ export default function ThemeCustomizer({
   const [localPreferences, setLocalPreferences] = useState<ThemePreference>({ ...preferences })
   const [activeTab, setActiveTab] = useState("colors")
 
-  // Update local preferences when props change
-  useEffect(() => {
+    useEffect(() => {
     setLocalPreferences({ ...preferences })
   }, [preferences])
 
-  // Color options
-  const colorOptions = [
+    const colorOptions = [
     { value: "purple", label: "Purple", color: "bg-[hsl(262,83%,58%)]" },
     { value: "blue", label: "Blue", color: "bg-[hsl(220,83%,58%)]" },
     { value: "green", label: "Green", color: "bg-[hsl(142,83%,58%)]" },
     { value: "red", label: "Red", color: "bg-[hsl(0,83%,58%)]" },
   ]
 
-  // Animation speed examples
-  const getAnimationDuration = (speed: string) => {
+    const getAnimationDuration = (speed: string) => {
     switch (speed) {
       case "slow":
         return "duration-1000"
@@ -77,8 +72,7 @@ export default function ThemeCustomizer({
     onUpdate(localPreferences)
     setOpen(false)
 
-    // Show toast notification after user action
-    toast({
+        toast({
       title: "Theme updated",
       description: "Your theme preferences have been applied.",
       action: (

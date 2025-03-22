@@ -362,4 +362,3 @@ export const sampleGrants: Grant[] = [
     applicationLink: "https://example.com/apply",
   },
 ]
-

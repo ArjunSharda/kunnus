@@ -13,15 +13,13 @@ interface GrantKanbanBoardProps {
 }
 
 export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: GrantKanbanBoardProps) {
-  // Add client-side only rendering to avoid hydration issues
-  const [mounted, setMounted] = useState(false)
+    const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Group grants by status
-  const [columns, setColumns] = useState<Record<ApplicationStatus, Grant[]>>(() => {
+    const [columns, setColumns] = useState<Record<ApplicationStatus, Grant[]>>(() => {
     const initialColumns: Record<ApplicationStatus, Grant[]> = {
       "Not Started": [],
       "In Progress": [],
@@ -38,8 +36,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
     return initialColumns
   })
 
-  // Update columns when grants or statuses change
-  useEffect(() => {
+    useEffect(() => {
     const updatedColumns: Record<ApplicationStatus, Grant[]> = {
       "Not Started": [],
       "In Progress": [],
@@ -56,47 +53,36 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
     setColumns(updatedColumns)
   }, [grants, statuses])
 
-  // Handle drag end
-  const handleDragEnd = (result: DropResult) => {
+    const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result
 
-    // Dropped outside the list
-    if (!destination) return
+        if (!destination) return
 
-    // Dropped in the same column at the same position
-    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+        if (source.droppableId === destination.droppableId && source.index === destination.index) {
       return
     }
 
-    // Get the source and destination columns
-    const sourceColumn = columns[source.droppableId as ApplicationStatus]
+        const sourceColumn = columns[source.droppableId as ApplicationStatus]
     const destColumn = columns[destination.droppableId as ApplicationStatus]
 
-    // Get the grant being dragged
-    const grant = sourceColumn[source.index]
+        const grant = sourceColumn[source.index]
 
-    // Create new columns
-    const newColumns = { ...columns }
+        const newColumns = { ...columns }
 
-    // Remove from source column
-    newColumns[source.droppableId as ApplicationStatus] = sourceColumn.filter((_, index) => index !== source.index)
+        newColumns[source.droppableId as ApplicationStatus] = sourceColumn.filter((_, index) => index !== source.index)
 
-    // Add to destination column
-    newColumns[destination.droppableId as ApplicationStatus] = [
+        newColumns[destination.droppableId as ApplicationStatus] = [
       ...destColumn.slice(0, destination.index),
       grant,
       ...destColumn.slice(destination.index),
     ]
 
-    // Update state
-    setColumns(newColumns)
+        setColumns(newColumns)
 
-    // Update status in parent component
-    onUpdateStatus(grant.id, destination.droppableId as ApplicationStatus)
+        onUpdateStatus(grant.id, destination.droppableId as ApplicationStatus)
   }
 
-  // Get column background color
-  const getColumnColor = (status: ApplicationStatus) => {
+    const getColumnColor = (status: ApplicationStatus) => {
     switch (status) {
       case "Not Started":
         return "bg-gray-100 dark:bg-gray-800"
@@ -113,8 +99,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
     }
   }
 
-  // Get badge color
-  const getBadgeColor = (status: ApplicationStatus) => {
+    const getBadgeColor = (status: ApplicationStatus) => {
     switch (status) {
       case "Not Started":
         return "bg-gray-200 dark:bg-gray-700"
@@ -131,8 +116,7 @@ export default function GrantKanbanBoard({ grants, statuses, onUpdateStatus }: G
     }
   }
 
-  // Don't render the DragDropContext until client-side to avoid hydration issues
-  if (!mounted) {
+    if (!mounted) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {Object.entries(columns).map(([status, grantsInColumn]) => (

@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { CheckedState } from "@radix-ui/react-checkbox"
 
-// Define a proper type instead of using any
 interface FilterOptions {
   category?: string
   schoolType?: string
@@ -35,8 +34,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
   const [amountRange, setAmountRange] = useState([0, 100000])
   const [deadlineDays, setDeadlineDays] = useState<number | null>(null)
   const [activeTab, setActiveTab] = useState("basic")
-  // Add missing state variables
-  const [hideExpired, setHideExpired] = useState(false)
+    const [hideExpired, setHideExpired] = useState(false)
   const [bookmarkedOnly, setBookmarkedOnly] = useState(false)
   const [urgentOnly, setUrgentOnly] = useState(false)
   const [statusFilter, setStatusFilter] = useState("all")
@@ -47,23 +45,18 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
     }
   }
 
-  // Update the handleApplyFilters function to ensure it properly passes filter values
-  const handleApplyFilters = () => {
-    // Create a filters object with only the values that are actually set
-    const filters: FilterOptions = {};
+    const handleApplyFilters = () => {
+        const filters: FilterOptions = {};
     
-    // Only add category if it's not "all"
-    if (category !== "all") {
+        if (category !== "all") {
       filters.category = category;
     }
     
-    // Only add schoolType if it's not "all"
-    if (schoolType !== "all") {
+        if (schoolType !== "all") {
       filters.schoolType = schoolType;
     }
     
-    // Only add amount range if it's different from the default
-    if (amountRange[0] > 0) {
+        if (amountRange[0] > 0) {
       filters.minAmount = amountRange[0];
     }
     
@@ -71,13 +64,11 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
       filters.maxAmount = amountRange[1];
     }
     
-    // Only add deadlineDays if it's set
-    if (deadlineDays !== null) {
+        if (deadlineDays !== null) {
       filters.deadlineDays = deadlineDays;
     }
     
-    // Only add boolean filters if they're true
-    if (hideExpired) {
+        if (hideExpired) {
       filters.hideExpired = true;
     }
     
@@ -89,8 +80,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
       filters.urgentOnly = true;
     }
     
-    // Only add statusFilter if it's not "all"
-    if (statusFilter !== "all") {
+        if (statusFilter !== "all") {
       filters.statusFilter = statusFilter;
     }
     
@@ -98,8 +88,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
     onApplyFilters(filters);
   };
 
-  // Update the handleReset function to ensure it properly resets all filters
-  const handleReset = () => {
+    const handleReset = () => {
     setCategory("all");
     setSchoolType("all");
     setAmountRange([0, 100000]);
@@ -109,8 +98,7 @@ export default function FilterPanel({ onApplyFilters }: FilterPanelProps) {
     setUrgentOnly(false);
     setStatusFilter("all");
     
-    // Call onApplyFilters with an empty object to reset filters
-    onApplyFilters({});
+        onApplyFilters({});
   };
 
   return (
