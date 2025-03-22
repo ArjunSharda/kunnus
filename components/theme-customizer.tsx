@@ -1,23 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Check, Paintbrush, X, Palette, Sparkles, Radius, Save } from 'lucide-react'
+import { Check, X, Palette, Sparkles, Radius, Save } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/hooks/use-toast"
 import type { ThemePreference } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 interface ThemeCustomizerProps {
-  preferences?: ThemePreference
-  onUpdate?: (preferences: Partial<ThemePreference>) => void
-  className?: string
-  variant?: "ghost" | "outline" | "default"
+  preferences: ThemePreference
+  onUpdate: (preferences: Partial<ThemePreference>) => void
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
   size?: "default" | "sm" | "lg" | "icon"
+  className?: string
 }
 
 // Add type guards to ensure values are valid
@@ -29,31 +29,25 @@ const isBorderRadius = (radius: string): radius is "none" | "small" | "medium" |
   return ["none", "small", "medium", "large"].includes(radius)
 }
 
-const isAnimationSpeed = (speed: string): speed is "none" | "slow" | "medium" | "fast" => {
+const isAnimationSpeed = (speed: string): boolean => {
   return ["none", "slow", "medium", "fast"].includes(speed)
 }
 
-export default function ThemeCustomizer({ 
-  preferences, 
+export default function ThemeCustomizer({
+  preferences,
   onUpdate,
+  variant = "default",
+  size = "default",
   className,
-  variant = "ghost",
-  size = "icon"
 }: ThemeCustomizerProps) {
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
-  const [localPreferences, setLocalPreferences] = useState<ThemePreference>(preferences || {
-    primaryColor: "purple",
-    borderRadius: "medium",
-    animation: "medium",
-  })
+  const [localPreferences, setLocalPreferences] = useState<ThemePreference>({ ...preferences })
   const [activeTab, setActiveTab] = useState("colors")
-  
+
   // Update local preferences when props change
   useEffect(() => {
-    if (preferences) {
-      setLocalPreferences(preferences)
-    }
+    setLocalPreferences({ ...preferences })
   }, [preferences])
 
   // Color options
@@ -67,19 +61,22 @@ export default function ThemeCustomizer({
   // Animation speed examples
   const getAnimationDuration = (speed: string) => {
     switch (speed) {
-      case "slow": return "duration-1000"
-      case "medium": return "duration-500"
-      case "fast": return "duration-300"
-      default: return "duration-0"
+      case "slow":
+        return "duration-1000"
+      case "medium":
+        return "duration-500"
+      case "fast":
+        return "duration-300"
+      default:
+        return "duration-0"
     }
   }
 
   const handleApply = () => {
-    if (onUpdate) {
-      onUpdate(localPreferences)
-    }
+    onUpdate(localPreferences)
     setOpen(false)
-    
+
+    // Show toast notification after user action
     toast({
       title: "Theme updated",
       description: "Your theme preferences have been applied.",
@@ -92,21 +89,42 @@ export default function ThemeCustomizer({
   }
 
   const handleReset = () => {
-    if (preferences) {
-      setLocalPreferences(preferences)
+    setLocalPreferences({ ...preferences })
+  }
+
+  const handleColorChange = (color: string) => {
+    if (isPrimaryColor(color)) {
+      setLocalPreferences((prev) => ({ ...prev, primaryColor: color }))
+    }
+  }
+
+  const handleBorderRadiusChange = (radius: string) => {
+    if (isBorderRadius(radius)) {
+      setLocalPreferences((prev) => ({ ...prev, borderRadius: radius }))
+    }
+  }
+
+  const handleAnimationChange = (speed: string) => {
+    if (isAnimationSpeed(speed)) {
+      setLocalPreferences((prev) => ({ ...prev, animation: speed }))
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant={variant} 
-          size={size} 
-          className={className}
-          aria-label="Customize theme"
-        >
-          <Palette className="h-5 w-5" />
+        <Button variant={variant} size={size} className={cn("relative", className)}>
+          {size === "icon" ? (
+            <>
+              <Palette className="h-4 w-4" />
+              <span className="sr-only">Customize theme</span>
+            </>
+          ) : (
+            <>
+              <Palette className="h-4 w-4 mr-2" />
+              Customize Theme
+            </>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -116,7 +134,7 @@ export default function ThemeCustomizer({
             Customize Theme
           </DialogTitle>
         </DialogHeader>
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
           <TabsList className="grid grid-cols-3 mb-4">
             <TabsTrigger value="colors" className="flex items-center gap-1">
@@ -132,7 +150,7 @@ export default function ThemeCustomizer({
               <span className="hidden sm:inline">Animation</span>
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="colors" className="space-y-4">
             <div className="space-y-2">
               <Label>Primary Color</Label>
@@ -143,13 +161,11 @@ export default function ThemeCustomizer({
                     variant="outline"
                     className={cn(
                       "h-16 p-0 border-2 relative overflow-hidden transition-all",
-                      localPreferences.primaryColor === option.value ? "border-primary ring-2 ring-primary/20" : "border-transparent",
+                      localPreferences.primaryColor === option.value
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-transparent",
                     )}
-                    onClick={() => {
-                      if (isPrimaryColor(option.value)) {
-                        setLocalPreferences({ ...localPreferences, primaryColor: option.value })
-                      }
-                    }}
+                    onClick={() => handleColorChange(option.value)}
                   >
                     <div className="flex flex-col items-center justify-center w-full h-full">
                       <div className={cn("w-8 h-8 rounded-full mb-1", option.color)}>
@@ -175,33 +191,35 @@ export default function ThemeCustomizer({
                   </Button>
                 ))}
               </div>
-              
+
               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Preview</div>
                 <div className="mt-2 flex gap-2">
-                  <div className={cn(
-                    "w-full h-8 rounded-md transition-colors",
-                    `bg-[hsl(${
-                      localPreferences.primaryColor === "purple" ? "262" :
-                      localPreferences.primaryColor === "blue" ? "220" :
-                      localPreferences.primaryColor === "green" ? "142" : "0"
-                    },83%,58%)]`
-                  )} />
+                  <div
+                    className={cn(
+                      "w-full h-8 rounded-md transition-colors",
+                      `bg-[hsl(${
+                        localPreferences.primaryColor === "purple"
+                          ? "262"
+                          : localPreferences.primaryColor === "blue"
+                            ? "220"
+                            : localPreferences.primaryColor === "green"
+                              ? "142"
+                              : "0"
+                      },83%,58%)]`,
+                    )}
+                  />
                 </div>
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="radius" className="space-y-4">
             <div className="space-y-2">
               <Label>Border Radius</Label>
               <RadioGroup
                 value={localPreferences.borderRadius}
-                onValueChange={(value) => {
-                  if (isBorderRadius(value)) {
-                    setLocalPreferences({ ...localPreferences, borderRadius: value })
-                  }
-                }}
+                onValueChange={handleBorderRadiusChange}
                 className="grid grid-cols-4 gap-2"
               >
                 <div>
@@ -257,31 +275,33 @@ export default function ThemeCustomizer({
                   </Label>
                 </div>
               </RadioGroup>
-              
+
               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Preview</div>
                 <div className="mt-2 flex gap-2">
-                  <div className={cn(
-                    "w-full h-16 bg-primary transition-all",
-                    localPreferences.borderRadius === "none" ? "rounded-none" :
-                    localPreferences.borderRadius === "small" ? "rounded-sm" :
-                    localPreferences.borderRadius === "medium" ? "rounded-md" : "rounded-lg"
-                  )} />
+                  <div
+                    className={cn(
+                      "w-full h-16 bg-primary transition-all",
+                      localPreferences.borderRadius === "none"
+                        ? "rounded-none"
+                        : localPreferences.borderRadius === "small"
+                          ? "rounded-sm"
+                          : localPreferences.borderRadius === "medium"
+                            ? "rounded-md"
+                            : "rounded-lg",
+                    )}
+                  />
                 </div>
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="animation" className="space-y-4">
             <div className="space-y-2">
               <Label>Animation Speed</Label>
               <RadioGroup
                 value={localPreferences.animation}
-                onValueChange={(value) => {
-                  if (isAnimationSpeed(value)) {
-                    setLocalPreferences({ ...localPreferences, animation: value })
-                  }
-                }}
+                onValueChange={handleAnimationChange}
                 className="grid grid-cols-4 gap-2"
               >
                 <div>
@@ -345,7 +365,7 @@ export default function ThemeCustomizer({
                   </Label>
                 </div>
               </RadioGroup>
-              
+
               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Preview</div>
                 <div className="mt-2 flex justify-center p-4">
@@ -355,15 +375,19 @@ export default function ThemeCustomizer({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      transition={{ 
-                        duration: 
-                          localPreferences.animation === "slow" ? 1 :
-                          localPreferences.animation === "medium" ? 0.5 :
-                          localPreferences.animation === "fast" ? 0.3 : 0
+                      transition={{
+                        duration:
+                          localPreferences.animation === "slow"
+                            ? 1
+                            : localPreferences.animation === "medium"
+                              ? 0.5
+                              : localPreferences.animation === "fast"
+                                ? 0.3
+                                : 0,
                       }}
                       className={cn(
                         "w-16 h-16 bg-primary rounded-md flex items-center justify-center",
-                        getAnimationDuration(localPreferences.animation)
+                        getAnimationDuration(localPreferences.animation),
                       )}
                     >
                       <Sparkles className="h-8 w-8 text-primary-foreground" />
@@ -374,7 +398,7 @@ export default function ThemeCustomizer({
             </div>
           </TabsContent>
         </Tabs>
-        
+
         <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t">
           <Button variant="outline" size="sm" onClick={handleReset}>
             Reset
@@ -388,3 +412,4 @@ export default function ThemeCustomizer({
     </Dialog>
   )
 }
+
