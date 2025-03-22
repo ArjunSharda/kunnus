@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowRight, CheckCircle, Award, Search, Calendar, BookOpen, Users } from 'lucide-react'
+import { ArrowRight, CheckCircle, Award, Search, Calendar, BookOpen, Users, FileText, DollarSign, Clock } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -56,26 +56,30 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1/2 h-3/4 bg-primary/5 rounded-l-full blur-3xl -z-10"></div>
+        <div className="absolute top-1/2 right-0 translate-y-[-40%] w-1/2 h-3/4 bg-primary/5 rounded-l-full blur-3xl -z-10"></div>
+        <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-background to-transparent -z-10"></div>
 
         <div className="container relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-                  Discover <span className="text-primary">Educational Grants</span> That Fuel Classrooms
+                  Discover <span className="text-primary relative inline-block">
+                    Educational Grants
+                    <span className="absolute -bottom-1 left-0 right-0 h-1 bg-primary/30 rounded-full"></span>
+                  </span> That Fuel Classrooms
                 </h1>
                 <p className="text-xl text-muted-foreground mb-8 max-w-lg">
                   Find, track, and apply for grants designed specifically for educators. Never miss an opportunity to
                   fund your educational vision.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" asChild className="text-base">
+                  <Button size="lg" asChild className="text-base bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-300">
                     <Link href="/finder">
                       Explore Grants <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild className="text-base">
+                  <Button size="lg" variant="outline" asChild className="text-base border-primary/20 hover:bg-primary/5">
                     <Link href="#how-it-works">How It Works</Link>
                   </Button>
                 </div>
@@ -104,17 +108,96 @@ export default function LandingPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="relative"
             >
-              <div className="relative z-10 bg-gradient-to-br from-background to-muted p-2 rounded-xl shadow-xl border">
-                <Image
-                  src="/placeholder.svg?height=600&width=800"
-                  width={800}
-                  height={600}
-                  alt="Grant Finder Dashboard"
-                  className="rounded-lg w-full"
-                />
+              {/* Main Dashboard Card */}
+              <div className="relative z-10 bg-gradient-to-br from-background/80 to-background/30 p-5 rounded-2xl shadow-2xl border backdrop-blur-sm transform perspective-1200 rotate-y-2 rotate-x-2">
+                {/* Dashboard Header */}
+                <div className="flex justify-between items-center mb-4 bg-muted/80 p-3 rounded-xl">
+                  <div>
+                    <h3 className="font-bold text-lg">Grant Finder Dashboard</h3>
+                    <p className="text-xs text-muted-foreground">12 matching grants found</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                  </div>
+                </div>
+                
+                {/* Dashboard Content */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-medium">Available</h4>
+                    <p className="text-lg font-bold">$2.5M</p>
+                  </div>
+                  <div className="bg-background p-3 rounded-lg border">
+                    <FileText className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-medium">Grants</h4>
+                    <p className="text-lg font-bold">156</p>
+                  </div>
+                  <div className="bg-background p-3 rounded-lg border">
+                    <Clock className="h-5 w-5 text-primary mb-2" />
+                    <h4 className="text-sm font-medium">Closing Soon</h4>
+                    <p className="text-lg font-bold">23</p>
+                  </div>
+                </div>
+                
+                {/* Grant List */}
+                <div className="space-y-3">
+                  {[
+                    { title: "STEM Innovation Grant", amount: "$5,000", deadline: "Oct 15", match: "96%" },
+                    { title: "Classroom Technology Fund", amount: "$2,500", deadline: "Nov 3", match: "92%" },
+                    { title: "Arts Education Initiative", amount: "$3,200", deadline: "Dec 1", match: "88%" },
+                  ].map((grant, i) => (
+                    <motion.div 
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + (i * 0.1) }}
+                      className="bg-card border p-3 rounded-lg flex justify-between items-center"
+                    >
+                      <div>
+                        <h4 className="font-medium">{grant.title}</h4>
+                        <div className="flex gap-3 text-xs text-muted-foreground">
+                          <span>{grant.amount}</span>
+                          <span>Due: {grant.deadline}</span>
+                        </div>
+                      </div>
+                      <div className="bg-primary/10 text-primary text-sm font-medium px-2 py-1 rounded">
+                        {grant.match}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary rounded-full blur-2xl opacity-50"></div>
-              <div className="absolute -top-6 -left-6 w-32 h-32 bg-primary/30 rounded-full blur-3xl"></div>
+              
+              {/* Floating Elements */}
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+                className="absolute -left-12 top-1/4 bg-background border shadow-lg p-3 rounded-lg z-20 max-w-[130px]"
+              >
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span className="font-medium">New Grant</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">STEM Fund added today</p>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9, duration: 0.5 }}
+                className="absolute -bottom-6 right-10 bg-primary text-white shadow-lg shadow-primary/20 p-3 rounded-lg z-20"
+              >
+                <CheckCircle className="h-4 w-4 inline mr-1" />
+                <span className="text-sm font-medium">Grant matched!</span>
+              </motion.div>
+              
+              {/* Background Effects */}
+              <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-primary/40 rounded-full blur-3xl opacity-60"></div>
+              <div className="absolute -top-8 -left-8 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
             </motion.div>
           </div>
         </div>
