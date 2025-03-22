@@ -36,6 +36,7 @@ import {
   FolderPlus,
   Home,
   BarChart,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -141,6 +142,7 @@ export default function GrantFinder() {
     borderRadius: "medium",
     animation: "medium",
   })
+  const [themeUpdated, setThemeUpdated] = useState<boolean>(false)
   const [cardSize, setCardSize] = useState<"compact" | "normal" | "detailed">("normal")
   const [recentActivity, setRecentActivity] = useState<
     {
@@ -149,6 +151,10 @@ export default function GrantFinder() {
       timestamp: number
     }[]
   >([])
+
+  const [bookmarkAdded, setBookmarkAdded] = useState<string | null>(null)
+  const [folderAddition, setFolderAddition] = useState<{grantId: string, folderName: string} | null>(null)
+  const [statusUpdate, setStatusUpdate] = useState<{grantId: string, status: string} | null>(null)
 
   const totalPages = Math.ceil(filteredGrants.length / ITEMS_PER_PAGE)
 
@@ -441,15 +447,16 @@ export default function GrantFinder() {
   )
 
   useEffect(() => {
-    let results = grants
+    let results = [...grants]
 
-    if (searchQuery) {
+    if (searchQuery.trim()) {
+      const searchTerms = searchQuery.toLowerCase().trim();
       results = results.filter(
         (grant) =>
-          grant.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          grant.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          grant.fundingSource.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          grant.category.toLowerCase().includes(searchQuery.toLowerCase()),
+          grant.title.toLowerCase().includes(searchTerms) ||
+          grant.description.toLowerCase().includes(searchTerms) ||
+          grant.fundingSource.toLowerCase().includes(searchTerms) ||
+          grant.category.toLowerCase().includes(searchTerms),
       )
     }
 
@@ -465,11 +472,9 @@ export default function GrantFinder() {
     }
 
     results = sortGrants(results)
-
-    if (!showFilters) {
-      setFilteredGrants(results)
-      setCurrentPage(1)
-    }
+    
+    setFilteredGrants(results)
+    setCurrentPage(1)
   }, [
     searchQuery,
     grants,
@@ -479,8 +484,138 @@ export default function GrantFinder() {
     bookmarkFolders,
     sortOption,
     sortGrants,
-    showFilters,
   ])
+
+  const applyFilters = (filters: FilterOptions) => {
+    let results = [...grants]
+    
+    if (searchQuery.trim()) {
+      const searchTerms = searchQuery.toLowerCase().trim();
+      results = results.filter(
+        (grant) =>
+          grant.title.toLowerCase().includes(searchTerms) ||
+          grant.description.toLowerCase().includes(searchTerms) ||
+          grant.fundingSource.toLowerCase().includes(searchTerms) ||
+          grant.category.toLowerCase().includes(searchTerms)
+      )
+    }
+    
+    if (activeTab === "bookmarked") {
+      if (activeFolder === "default") {
+        results = results.filter((grant) => bookmarkedGrants.includes(grant.id))
+      } else {
+        const folder = bookmarkFolders.find((f) => f.id === activeFolder)
+        if (folder && folder.grantIds) {
+          results = results.filter((grant) => folder.grantIds?.includes(grant.id))
+        }
+      }
+    }
+
+    if (filters.category && filters.category !== 'all') {
+      results = results.filter((grant) => grant.category === filters.category)
+    }
+
+    if (filters.schoolType && filters.schoolType !== 'all_schools') {
+      results = results.filter((grant) => 
+        grant.eligibility.some((item) => item.toLowerCase().includes(filters.schoolType!.toLowerCase()))
+      )
+    }
+
+    if (filters.minAmount !== undefined && filters.minAmount > 0) {
+      results = results.filter((grant) => grant.amount >= filters.minAmount!)
+    }
+
+    if (filters.maxAmount !== undefined && filters.maxAmount < 100000) {
+      results = results.filter((grant) => grant.amount <= filters.maxAmount!)
+    }
+
+    if (filters.deadlineDays && typeof filters.deadlineDays === 'number' && filters.deadlineDays > 0) {
+      const today = new Date()
+      results = results.filter((grant) => {
+        const deadlineDate = new Date(grant.deadline)
+        const diffTime = deadlineDate.getTime() - today.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return diffDays > 0 && diffDays <= filters.deadlineDays!
+      })
+    }
+
+    if (filters.hideExpired) {
+      const today = new Date()
+      results = results.filter((grant) => {
+        const deadlineDate = new Date(grant.deadline)
+        return deadlineDate >= today
+      })
+    }
+
+    if (filters.bookmarkedOnly) {
+      results = results.filter((grant) => bookmarkedGrants.includes(grant.id))
+    }
+
+    if (filters.urgentOnly) {
+      const today = new Date()
+      results = results.filter((grant) => {
+        const deadlineDate = new Date(grant.deadline)
+        const diffTime = deadlineDate.getTime() - today.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return diffDays > 0 && diffDays <= 7
+      })
+    }
+
+    if (filters.statusFilter && filters.statusFilter !== "all") {
+      results = results.filter((grant) => grantStatuses[grant.id] === filters.statusFilter)
+    }
+
+    results = sortGrants(results)
+
+    console.log("Filtered results count:", results.length)
+    
+    setFilteredGrants(results)
+    setCurrentPage(1)
+  }
+
+  useEffect(() => {
+    if (themeUpdated) {
+      toast({
+        title: "Theme Updated",
+        description: "Your theme preferences have been applied",
+        duration: 3000,
+      })
+      setThemeUpdated(false)
+    }
+  }, [themeUpdated, toast])
+  
+  useEffect(() => {
+    if (bookmarkAdded) {
+      toast({
+        title: "Grant Bookmarked",
+        description: "You can find this grant in your bookmarks tab.",
+        duration: 3000,
+      })
+      setBookmarkAdded(null)
+    }
+  }, [bookmarkAdded, toast])
+  
+  useEffect(() => {
+    if (folderAddition) {
+      toast({
+        title: "Added to Folder",
+        description: `Grant added to "${folderAddition.folderName}" successfully`,
+        duration: 3000,
+      })
+      setFolderAddition(null)
+    }
+  }, [folderAddition, toast])
+  
+  useEffect(() => {
+    if (statusUpdate) {
+      toast({
+        title: "Status Updated",
+        description: `Grant status set to ${statusUpdate.status}`,
+        duration: 3000,
+      })
+      setStatusUpdate(null)
+    }
+  }, [statusUpdate, toast])
 
   const toggleBookmark = (grantId: string) => {
     setBookmarkedGrants((prev) => {
@@ -495,12 +630,8 @@ export default function GrantFinder() {
         addActivity("Removed bookmark", grantId)
         return prev.filter((id) => id !== grantId)
       } else {
-        toast({
-          title: "Grant Bookmarked",
-          description: "You can find this grant in your bookmarks tab.",
-          duration: 3000,
-        })
-
+        setBookmarkAdded(grantId)
+        
         addActivity("Added bookmark", grantId)
         return [...prev, grantId]
       }
@@ -513,11 +644,7 @@ export default function GrantFinder() {
       [grantId]: status,
     }))
 
-    toast({
-      title: "Status Updated",
-      description: `Grant status set to ${status}`,
-      duration: 3000,
-    })
+    setStatusUpdate({grantId, status})
 
     addActivity(`Updated status to ${status}`, grantId)
   }
@@ -536,12 +663,8 @@ export default function GrantFinder() {
     )
 
     const folderName = bookmarkFolders.find((f) => f.id === folderId)?.name || "folder"
-
-    toast({
-      title: "Added to Folder",
-      description: `Grant added to "${folderName}" successfully`,
-      duration: 3000,
-    })
+    
+    setFolderAddition({grantId, folderName})
 
     addActivity(`Added to folder "${folderName}"`, grantId)
   }
@@ -595,70 +718,6 @@ export default function GrantFinder() {
       duration: 3000,
     })
   }
-
-  const applyFilters = (filters: FilterOptions) => {
-    console.log("Applying filters:", filters) 
-    let filtered = [...grants]
-
-    if (filters.category) {
-      filtered = filtered.filter((grant) => grant.category === filters.category)
-    }
-
-    if (filters.schoolType) {
-      filtered = filtered.filter((grant) => grant.eligibility.some((item) => item.includes(filters.schoolType!)))
-    }
-
-    if (filters.minAmount !== undefined && filters.minAmount > 0) {
-      filtered = filtered.filter((grant) => grant.amount >= filters.minAmount!)
-    }
-
-    if (filters.maxAmount !== undefined && filters.maxAmount < 100000) {
-      filtered = filtered.filter((grant) => grant.amount <= filters.maxAmount!)
-    }
-
-    if (filters.deadlineDays) {
-      const today = new Date()
-      filtered = filtered.filter((grant) => {
-        const deadlineDate = new Date(grant.deadline)
-        const diffTime = deadlineDate.getTime() - today.getTime()
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-        return diffDays > 0 && diffDays <= filters.deadlineDays!
-      })
-    }
-
-    if (filters.hideExpired) {
-      const today = new Date()
-      filtered = filtered.filter((grant) => {
-        const deadlineDate = new Date(grant.deadline)
-        return deadlineDate >= today
-      })
-    }
-
-    if (filters.bookmarkedOnly) {
-      filtered = filtered.filter((grant) => bookmarkedGrants.includes(grant.id))
-    }
-
-    if (filters.urgentOnly) {
-      const today = new Date()
-      filtered = filtered.filter((grant) => {
-        const deadlineDate = new Date(grant.deadline)
-        const diffTime = deadlineDate.getTime() - today.getTime()
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-        return diffDays > 0 && diffDays <= 7
-      })
-    }
-
-    if (filters.statusFilter) {
-      filtered = filtered.filter((grant) => grantStatuses[grant.id] === filters.statusFilter)
-    }
-
-    filtered = sortGrants(filtered)
-
-    console.log("Filtered grants:", filtered.length) 
-    setFilteredGrants(filtered)
-    setCurrentPage(1)
-  }
-
 
   const saveCurrentSearch = (name: string) => {
     if (!name.trim()) return
@@ -851,13 +910,20 @@ export default function GrantFinder() {
       ...prev,
       ...preference,
     }))
-
-    toast({
-      title: "Theme Updated",
-      description: "Your theme preferences have been applied",
-      duration: 3000,
-    })
+    
+    setThemeUpdated(true)
   }
+
+  useEffect(() => {
+    if (themeUpdated) {
+      toast({
+        title: "Theme Updated",
+        description: "Your theme preferences have been applied",
+        duration: 3000,
+      })
+      setThemeUpdated(false)
+    }
+  }, [themeUpdated, toast])
 
   const printCurrentView = () => {
     window.print()
@@ -1142,11 +1208,111 @@ export default function GrantFinder() {
         highContrastMode ? "high-contrast" : "",
       )}
     >
+      {/* Hero Section - New */}
+      <div className="relative mb-12 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-primary/90 via-purple-600/90 to-indigo-600/90 px-8 py-16">
+        <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-10"></div>
+        <div className="absolute -left-12 -top-12 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
+        <div className="absolute -bottom-12 -right-12 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
+        <div className="relative">
+          <h1 className="mb-4 text-center text-5xl font-bold tracking-tight text-white">
+            Discover Education Grants
+            <span className="relative ml-4 inline-block">
+              <Sparkles className="absolute -right-8 -top-1 h-6 w-6 animate-pulse text-yellow-300" />
+            </span>
+          </h1>
+          <p className="mx-auto mb-8 max-w-2xl text-center text-xl text-white/90">
+            Find and manage funding opportunities tailored to your institution's needs
+          </p>
+          <div className="relative mx-auto max-w-3xl">
+            <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-pink-500/30 via-purple-500/30 to-indigo-500/30 blur-xl"></div>
+            <div className="relative flex gap-2 rounded-xl bg-white/10 p-1 backdrop-blur-sm">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white" />
+              <Input
+                type="search"
+                placeholder="Search for grants by keyword, subject, or funding source..."
+                className="border-white/20 bg-white/10 pl-10 text-white placeholder:text-white/70 focus-visible:ring-purple-500/50"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="icon" className="bg-white/20 text-white hover:bg-white/30">
+                    <Save className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Save Current Search</DropdownMenuItem>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Save Search</DialogTitle>
+                        <DialogDescription>Give your search a name to save it for later.</DialogDescription>
+                      </DialogHeader>
+                      <Input
+                        placeholder="Search name"
+                        value={newFolderName}
+                        onChange={(e) => setNewFolderName(e.target.value)}
+                      />
+                      <DialogFooter>
+                        <Button
+                          onClick={() => {
+                            saveCurrentSearch(newFolderName)
+                            setNewFolderName("")
+                          }}
+                        >
+                          Save
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
+                  {savedSearches.length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Saved Searches</DropdownMenuLabel>
+                      {savedSearches.map((search) => (
+                        <DropdownMenuItem key={search.id} onClick={() => applySavedSearch(search)}>
+                          {search.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-center gap-3">
+            <Button 
+              onClick={() => setShowFilters(!showFilters)} 
+              className="group bg-white/20 text-white hover:bg-white/30 relative"
+              aria-expanded={showFilters}
+              aria-controls="filter-panel"
+            >
+              <Filter className="mr-2 h-4 w-4 transition-transform group-hover:rotate-12" />
+              {showFilters ? "Hide Filters" : "Show Filters"}
+              {showFilters && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-3 h-3 flex items-center justify-center animate-pulse"></span>
+              )}
+            </Button>
+            <Button 
+              onClick={() => setShowDashboard(true)} 
+              className="bg-white/20 text-white hover:bg-white/30"
+              variant="secondary"
+            >
+              <BarChart className="mr-2 h-4 w-4" />
+              Dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Back to Landing Page */}
-      <div className="mb-4">
-        <Button variant="ghost" size="sm" asChild>
+      <div className="mb-6">
+        <Button variant="ghost" size="sm" asChild className="group">
           <Link href="/" className="flex items-center gap-2">
-            <Home className="h-4 w-4" />
+            <Home className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Back to Home
           </Link>
         </Button>
@@ -1154,9 +1320,9 @@ export default function GrantFinder() {
 
       {/* Dashboard View */}
       {showDashboard && (
-        <div className="mb-8 animate-fadeIn">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Dashboard</h2>
+        <div className="mb-12 animate-fadeIn rounded-xl border bg-card/30 p-6 shadow-lg backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
             <Button variant="outline" size="sm" onClick={() => setShowDashboard(false)}>
               Close Dashboard
             </Button>
@@ -1169,11 +1335,11 @@ export default function GrantFinder() {
                 switch (widget.type) {
                   case "upcoming-deadlines":
                     return (
-                      <Card key={widget.id}>
-                        <CardHeader>
+                      <Card key={widget.id} className="border border-border/50 shadow-md hover:shadow-lg transition-all duration-300">
+                        <CardHeader className="bg-muted/30 rounded-t-lg">
                           <CardTitle>{widget.title}</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-4">
                           {grants
                             .filter((grant) => {
                               if (!bookmarkedGrants.includes(grant.id)) return false
@@ -1193,13 +1359,18 @@ export default function GrantFinder() {
                               return (
                                 <div
                                   key={grant.id}
-                                  className="flex items-center justify-between py-2 border-b last:border-0"
+                                  className="flex items-center justify-between py-3 border-b last:border-0 hover:bg-muted/10 px-2 rounded-md transition-colors"
                                 >
                                   <div className="flex-1">
                                     <p className="font-medium text-sm">{grant.title}</p>
                                     <p className="text-xs text-muted-foreground">{grant.deadline}</p>
                                   </div>
-                                  <Badge variant={diffDays <= 7 ? "destructive" : "outline"}>{diffDays} days</Badge>
+                                  <Badge 
+                                    variant={diffDays <= 7 ? "destructive" : "outline"}
+                                    className={diffDays <= 3 ? "animate-pulse" : ""}
+                                  >
+                                    {diffDays} days
+                                  </Badge>
                                 </div>
                               )
                             })}
@@ -1210,18 +1381,18 @@ export default function GrantFinder() {
                             const diffTime = deadlineDate.getTime() - today.getTime()
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
                             return diffDays > 0 && diffDays <= 14
-                          }).length === 0 && <p className="text-muted-foreground text-sm">No upcoming deadlines</p>}
+                          }).length === 0 && <p className="text-muted-foreground text-sm py-4">No upcoming deadlines</p>}
                         </CardContent>
                       </Card>
                     )
 
                   case "statistics":
                     return (
-                      <Card key={widget.id}>
-                        <CardHeader>
+                      <Card key={widget.id} className="border border-border/50 shadow-md hover:shadow-lg transition-all duration-300">
+                        <CardHeader className="bg-muted/30 rounded-t-lg">
                           <CardTitle>{widget.title}</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-4">
                           <GrantStatistics
                             grants={grants}
                             bookmarkedGrants={bookmarkedGrants}
@@ -1234,17 +1405,17 @@ export default function GrantFinder() {
 
                   case "recent-activity":
                     return (
-                      <Card key={widget.id}>
-                        <CardHeader>
+                      <Card key={widget.id} className="border border-border/50 shadow-md hover:shadow-lg transition-all duration-300">
+                        <CardHeader className="bg-muted/30 rounded-t-lg">
                           <CardTitle>{widget.title}</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-4">
                           {recentActivity.slice(0, 5).map((activity, index) => {
                             const grant = grants.find((g) => g.id === activity.grantId)
                             if (!grant) return null
 
                             return (
-                              <div key={index} className="flex items-start py-2 border-b last:border-0">
+                              <div key={index} className="flex items-start py-3 border-b last:border-0 hover:bg-muted/10 px-2 rounded-md transition-colors">
                                 <div className="flex-1">
                                   <p className="text-sm">
                                     <span className="font-medium">{activity.action}</span>
@@ -1258,7 +1429,7 @@ export default function GrantFinder() {
                             )
                           })}
                           {recentActivity.length === 0 && (
-                            <p className="text-muted-foreground text-sm">No recent activity</p>
+                            <p className="text-muted-foreground text-sm py-4">No recent activity</p>
                           )}
                         </CardContent>
                       </Card>
@@ -1272,8 +1443,8 @@ export default function GrantFinder() {
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" className="mt-4">
-                <Settings className="h-4 w-4 mr-2" />
+              <Button variant="outline" className="mt-6 group">
+                <Settings className="h-4 w-4 mr-2 transition-transform group-hover:rotate-45" />
                 Customize Dashboard
               </Button>
             </DialogTrigger>
@@ -1290,94 +1461,106 @@ export default function GrantFinder() {
 
       {/* Main Header */}
       <header className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              Kunnus
-            </h1>
-            {!showDashboard && (
-              <Button variant="outline" size="sm" onClick={() => setShowDashboard(true)}>
-                Dashboard
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleDarkMode}
+                aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                className="rounded-full shadow-sm hover:bg-primary/10 transition-colors"
+              >
+                {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
-            )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                aria-label={notificationsEnabled ? "Disable notifications" : "Enable notifications"}
+                className="rounded-full shadow-sm hover:bg-primary/10 transition-colors"
+              >
+                {notificationsEnabled ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
+              </Button>
+
+              <Dialog open={showKeyboardShortcuts} onOpenChange={setShowKeyboardShortcuts}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    aria-label="Keyboard shortcuts"
+                    className="rounded-full shadow-sm hover:bg-primary/10 transition-colors"
+                  >
+                    <Keyboard className="h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Keyboard Shortcuts</DialogTitle>
+                    <DialogDescription>Use these shortcuts to navigate quickly</DialogDescription>
+                  </DialogHeader>
+                  <KeyboardShortcutsHelp />
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="rounded-full shadow-sm hover:bg-primary/10 transition-colors"
+                  >
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={shareGrants}>Share Grants</DropdownMenuItem>
+                  <DropdownMenuItem onClick={printCurrentView}>
+                    <Printer className="h-4 w-4 mr-2" />
+                    Print View
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="rounded-full shadow-sm hover:bg-primary/10 transition-colors"
+                  >
+                    <Download className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => exportBookmarkedGrants("csv")}>Export as CSV</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportBookmarkedGrants("pdf")}>Export as PDF</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Theme Customizer with updated styling */}
+              <ThemeCustomizer 
+                preferences={themePreference} 
+                onUpdate={updateThemePreference} 
+                variant="ghost" 
+                size="icon"
+                className="rounded-full shadow-sm hover:bg-primary/10 transition-colors"
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-              aria-label={notificationsEnabled ? "Disable notifications" : "Enable notifications"}
-            >
-              {notificationsEnabled ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
-            </Button>
-
-            <Dialog open={showKeyboardShortcuts} onOpenChange={setShowKeyboardShortcuts}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Keyboard shortcuts">
-                  <Keyboard className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Keyboard Shortcuts</DialogTitle>
-                  <DialogDescription>Use these shortcuts to navigate quickly</DialogDescription>
-                </DialogHeader>
-                <KeyboardShortcutsHelp />
-              </DialogContent>
-            </Dialog>
-
+          <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Share2 className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={shareGrants}>Share Grants</DropdownMenuItem>
-                <DropdownMenuItem onClick={printCurrentView}>
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print View
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Download className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => exportBookmarkedGrants("csv")}>Export as CSV</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportBookmarkedGrants("pdf")}>Export as PDF</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Replace with direct use of ThemeCustomizer with appropriate styling */}
-            <ThemeCustomizer 
-              preferences={themePreference} 
-              onUpdate={updateThemePreference} 
-              variant="ghost" 
-              size="icon"
-            />
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="outline" className="group">
                   Options
+                  <SlidersHorizontal className="ml-2 h-4 w-4 transition-transform group-hover:rotate-12" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent className="w-56">
                 <DropdownMenuLabel>View Options</DropdownMenuLabel>
                 <DropdownMenuRadioGroup value={viewMode} onValueChange={(value) => setViewMode(value as ViewMode)}>
                   <DropdownMenuRadioItem value="grid">
@@ -1451,171 +1634,118 @@ export default function GrantFinder() {
                 </DropdownMenuSub>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-              aria-expanded={showFilters}
-              aria-controls="filter-panel"
-            >
-              <Filter className="h-4 w-4" />
-              Filters
-            </Button>
-          </div>
-        </div>
-
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <div className="flex gap-2">
-            <Input
-              type="search"
-              placeholder="Search for grants by keyword, subject, or funding source..."
-              className="pl-10 w-full"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Save className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Save Current Search</DropdownMenuItem>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Save Search</DialogTitle>
-                      <DialogDescription>Give your search a name to save it for later.</DialogDescription>
-                    </DialogHeader>
-                    <Input
-                      placeholder="Search name"
-                      value={newFolderName}
-                      onChange={(e) => setNewFolderName(e.target.value)}
-                    />
-                    <DialogFooter>
-                      <Button
-                        onClick={() => {
-                          saveCurrentSearch(newFolderName)
-                          setNewFolderName("")
-                        }}
-                      >
-                        Save
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                {savedSearches.length > 0 && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Saved Searches</DropdownMenuLabel>
-                    {savedSearches.map((search) => (
-                      <DropdownMenuItem key={search.id} onClick={() => applySavedSearch(search)}>
-                        {search.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
 
         {showFilters && (
-          <div id="filter-panel" className="mb-6">
+          <div id="filter-panel" className="mt-8 mb-6 animate-fadeIn border rounded-xl bg-card/30 p-6 shadow-lg backdrop-blur-sm">
             <FilterPanel onApplyFilters={applyFilters} />
           </div>
         )}
 
-        <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab} value={activeTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="all">All Grants</TabsTrigger>
-            <TabsTrigger value="bookmarked">
-              Bookmarked
-              {bookmarkedGrants.length > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {bookmarkedGrants.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
+        <div className="mt-8">
+          <Tabs 
+            defaultValue="all" 
+            className="w-full" 
+            onValueChange={setActiveTab} 
+            value={activeTab}
+          >
+            <TabsList className="grid w-full grid-cols-2 rounded-xl p-1">
+              <TabsTrigger 
+                value="all" 
+                className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white transition-all duration-300"
+              >
+                All Grants
+              </TabsTrigger>
+              <TabsTrigger 
+                value="bookmarked"
+                className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-purple-600/80 data-[state=active]:text-white transition-all duration-300"
+              >
+                Bookmarked
+                {bookmarkedGrants.length > 0 && (
+                  <Badge variant="secondary" className="ml-2 bg-white/20 text-white">
+                    {bookmarkedGrants.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-          {activeTab === "bookmarked" && bookmarkedGrants.length > 0 && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Label htmlFor="folder-select" className="mr-2">
-                Folder:
-              </Label>
-              <Select value={activeFolder} onValueChange={setActiveFolder}>
-                <SelectTrigger id="folder-select" className="w-[180px]">
-                  <SelectValue placeholder="Select folder" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">All Bookmarks</SelectItem>
-                  {bookmarkFolders
-                    .filter((f) => f.id !== "default")
-                    .map((folder) => (
-                      <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+            {activeTab === "bookmarked" && bookmarkedGrants.length > 0 && (
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Label htmlFor="folder-select" className="mr-1 font-medium">
+                  Folder:
+                </Label>
+                <Select value={activeFolder} onValueChange={setActiveFolder}>
+                  <SelectTrigger id="folder-select" className="w-[180px] bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+                    <SelectValue placeholder="Select folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">All Bookmarks</SelectItem>
+                    {bookmarkFolders
+                      .filter((f) => f.id !== "default")
+                      .map((folder) => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    New Folder
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Folder</DialogTitle>
-                    <DialogDescription>Create a new folder to organize your bookmarked grants.</DialogDescription>
-                  </DialogHeader>
-                  <Input
-                    placeholder="Folder name"
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                  />
-                  <DialogFooter>
-                    <Button onClick={createNewFolder}>Create</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          )}
-        </Tabs>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="group">
+                      <FolderPlus className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                      New Folder
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Folder</DialogTitle>
+                      <DialogDescription>Create a new folder to organize your bookmarked grants.</DialogDescription>
+                    </DialogHeader>
+                    <Input
+                      placeholder="Folder name"
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                    />
+                    <DialogFooter>
+                      <Button onClick={createNewFolder}>Create</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+          </Tabs>
+        </div>
       </header>
 
       {/* Bulk Actions Bar */}
       {selectedGrants.length > 0 && (
-        <div className="bg-muted/50 border rounded-lg p-2 mb-4 flex items-center justify-between animate-fadeIn">
+        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 border rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between animate-fadeIn gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">{selectedGrants.length} grants selected</span>
+            <Badge variant="secondary" className="px-3 py-1.5 text-sm">
+              {selectedGrants.length} grants selected
+            </Badge>
             <Button variant="ghost" size="sm" onClick={() => setSelectedGrants([])}>
               Clear
             </Button>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => performBulkAction("bookmark")}>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => performBulkAction("bookmark")} className="bg-white/50 dark:bg-gray-900/50">
               <Bookmark className="h-4 w-4 mr-2" />
               Bookmark All
             </Button>
-            <Button variant="outline" size="sm" onClick={() => performBulkAction("unbookmark")}>
+            <Button variant="outline" size="sm" onClick={() => performBulkAction("unbookmark")} className="bg-white/50 dark:bg-gray-900/50">
               <BookmarkCheck className="h-4 w-4 mr-2" />
               Remove Bookmarks
             </Button>
-            <Button variant="outline" size="sm" onClick={() => performBulkAction("export")}>
+            <Button variant="outline" size="sm" onClick={() => performBulkAction("export")} className="bg-white/50 dark:bg-gray-900/50">
               <Download className="h-4 w-4 mr-2" />
               Export Selected
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="bg-white/50 dark:bg-gray-900/50">
                   <FolderPlus className="h-4 w-4 mr-2" />
                   Add to Folder
                 </Button>
@@ -1638,6 +1768,7 @@ export default function GrantFinder() {
               size="sm"
               onClick={() => performBulkAction("compare")}
               disabled={selectedGrants.length < 2 || selectedGrants.length > 3}
+              className="bg-white/50 dark:bg-gray-900/50"
             >
               <Layers className="h-4 w-4 mr-2" />
               Compare
@@ -1647,13 +1778,13 @@ export default function GrantFinder() {
       )}
 
       {/* Sort Options */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 p-4 rounded-xl border bg-card/30 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <Label htmlFor="sort-select" className="text-sm">
+          <Label htmlFor="sort-select" className="text-sm font-medium">
             Sort by:
           </Label>
           <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
-            <SelectTrigger id="sort-select" className="w-[180px]">
+            <SelectTrigger id="sort-select" className="w-[180px] bg-white/50 dark:bg-gray-900/50">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -1667,12 +1798,13 @@ export default function GrantFinder() {
           </Select>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-lg">
           <Button
             variant={viewMode === "grid" ? "default" : "ghost"}
             size="icon"
             onClick={() => setViewMode("grid")}
             aria-label="Grid view"
+            className={viewMode === "grid" ? "bg-white dark:bg-gray-800" : ""}
           >
             <Grid className="h-4 w-4" />
           </Button>
@@ -1681,6 +1813,7 @@ export default function GrantFinder() {
             size="icon"
             onClick={() => setViewMode("list")}
             aria-label="List view"
+            className={viewMode === "list" ? "bg-white dark:bg-gray-800" : ""}
           >
             <List className="h-4 w-4" />
           </Button>
@@ -1689,6 +1822,7 @@ export default function GrantFinder() {
             size="icon"
             onClick={() => setViewMode("calendar")}
             aria-label="Calendar view"
+            className={viewMode === "calendar" ? "bg-white dark:bg-gray-800" : ""}
           >
             <Calendar className="h-4 w-4" />
           </Button>
@@ -1697,6 +1831,7 @@ export default function GrantFinder() {
             size="icon"
             onClick={() => setViewMode("kanban")}
             aria-label="Kanban view"
+            className={viewMode === "kanban" ? "bg-white dark:bg-gray-800" : ""}
           >
             <Columns className="h-4 w-4" />
           </Button>
@@ -1705,6 +1840,7 @@ export default function GrantFinder() {
             size="icon"
             onClick={() => setViewMode("map")}
             aria-label="Map view"
+            className={viewMode === "map" ? "bg-white dark:bg-gray-800" : ""}
           >
             <Map className="h-4 w-4" />
           </Button>
@@ -1712,7 +1848,13 @@ export default function GrantFinder() {
       </div>
 
       {/* Main Content */}
-      <main>{renderGrantsView()}</main>
+      <main className="animate-fadeIn relative">
+        {/* Decorative background elements */}
+        <div className="absolute -z-10 top-40 -left-20 h-72 w-72 rounded-full bg-primary/5 blur-3xl"></div>
+        <div className="absolute -z-10 bottom-20 -right-20 h-72 w-72 rounded-full bg-purple-500/5 blur-3xl"></div>
+        
+        {renderGrantsView()}
+      </main>
 
       {/* Grant Comparison Dialog */}
       <Dialog open={showComparison} onOpenChange={setShowComparison}>
