@@ -7,21 +7,42 @@ import { Card } from "@/components/ui/card"
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { Search, Filter, Bookmark, BookmarkCheck, Moon, Sun, Info, Download, Bell, BellOff, Keyboard, Calendar, Map, Grid, List, Columns, Settings, Share2, Printer, Save, Layers, ChevronLeft, ChevronRight, SlidersHorizontal, Palette, FolderPlus, Home, BarChart } from 'lucide-react'
+import {
+  Search,
+  Filter,
+  Bookmark,
+  BookmarkCheck,
+  Moon,
+  Sun,
+  Info,
+  Download,
+  Bell,
+  BellOff,
+  Keyboard,
+  Calendar,
+  Map,
+  Grid,
+  List,
+  Columns,
+  Settings,
+  Share2,
+  Printer,
+  Save,
+  Layers,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+  Palette,
+  FolderPlus,
+  Home,
+  BarChart,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationEllipsis,
-  PaginationPrevious,
-  PaginationNext
-} from "@/components/ui/pagination"
+import { Pagination } from "@/components/ui/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
@@ -198,7 +219,7 @@ export default function GrantFinder() {
 
   // Move toggleDarkMode definition here, before it's used in dependency arrays
   const toggleDarkMode = useCallback(() => {
-    setIsDarkMode(prev => !prev)
+    setIsDarkMode((prev) => !prev)
     document.documentElement.classList.toggle("dark")
   }, [])
 
@@ -329,10 +350,7 @@ export default function GrantFinder() {
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [
-  currentPage, 
-  totalPages
-])
+  }, [currentPage, totalPages])
 
   // Save state to localStorage when it changes
   useEffect(() => {
@@ -473,11 +491,24 @@ export default function GrantFinder() {
     // Sort results
     results = sortGrants(results)
 
-    setFilteredGrants(results)
-
-    // Reset to first page when filters change
-    setCurrentPage(1)
-  }, [searchQuery, grants, activeTab, bookmarkedGrants, activeFolder, bookmarkFolders, sortOption, sortGrants])
+    // Only update filtered grants if we're not in the middle of applying filters
+    // This prevents the filter panel from being overridden by this effect
+    if (!showFilters) {
+      setFilteredGrants(results)
+      // Reset to first page when filters change
+      setCurrentPage(1)
+    }
+  }, [
+    searchQuery,
+    grants,
+    activeTab,
+    bookmarkedGrants,
+    activeFolder,
+    bookmarkFolders,
+    sortOption,
+    sortGrants,
+    showFilters,
+  ])
 
   // Toggle bookmark for a grant
   const toggleBookmark = (grantId: string) => {
@@ -601,24 +632,22 @@ export default function GrantFinder() {
 
   // Apply filters from filter panel
   const applyFilters = (filters: FilterOptions) => {
-    let filtered = grants
+    console.log("Applying filters:", filters) // Add logging to debug
+    let filtered = [...grants] // Create a new array to avoid mutating the original
 
-    if (filters.category && filters.category !== "all") {
+    if (filters.category) {
       filtered = filtered.filter((grant) => grant.category === filters.category)
     }
 
-    if (filters.schoolType && filters.schoolType !== "all") {
-      // Fix the type error by adding the non-null assertion (!) since we already checked it's not null above
-      filtered = filtered.filter((grant) => grant.eligibility.includes(filters.schoolType!))
+    if (filters.schoolType) {
+      filtered = filtered.filter((grant) => grant.eligibility.some((item) => item.includes(filters.schoolType!)))
     }
 
-    if (filters.minAmount) {
-      // Add non-null assertion since we're already checking for existence
+    if (filters.minAmount !== undefined && filters.minAmount > 0) {
       filtered = filtered.filter((grant) => grant.amount >= filters.minAmount!)
     }
 
-    if (filters.maxAmount) {
-      // Add non-null assertion here too
+    if (filters.maxAmount !== undefined && filters.maxAmount < 100000) {
       filtered = filtered.filter((grant) => grant.amount <= filters.maxAmount!)
     }
 
@@ -628,7 +657,7 @@ export default function GrantFinder() {
         const deadlineDate = new Date(grant.deadline)
         const diffTime = deadlineDate.getTime() - today.getTime()
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-        return diffDays <= filters.deadlineDays!
+        return diffDays > 0 && diffDays <= filters.deadlineDays!
       })
     }
 
@@ -644,13 +673,24 @@ export default function GrantFinder() {
       filtered = filtered.filter((grant) => bookmarkedGrants.includes(grant.id))
     }
 
-    if (filters.statusFilter && filters.statusFilter !== "all") {
+    if (filters.urgentOnly) {
+      const today = new Date()
+      filtered = filtered.filter((grant) => {
+        const deadlineDate = new Date(grant.deadline)
+        const diffTime = deadlineDate.getTime() - today.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return diffDays > 0 && diffDays <= 7 // Urgent means within 7 days
+      })
+    }
+
+    if (filters.statusFilter) {
       filtered = filtered.filter((grant) => grantStatuses[grant.id] === filters.statusFilter)
     }
 
     // Sort results
     filtered = sortGrants(filtered)
 
+    console.log("Filtered grants:", filtered.length) // Add logging to debug
     setFilteredGrants(filtered)
     setCurrentPage(1) // Reset to first page
   }
@@ -943,10 +983,7 @@ export default function GrantFinder() {
             <span className="sr-only">Next page</span>
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-          >
+          <Button variant="outline" size="icon">
             <span className="sr-only">Next page</span>
             <ChevronRight className="h-4 w-4" />
           </Button>
