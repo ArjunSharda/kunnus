@@ -271,8 +271,9 @@ export default function GrantStatistics({ grants, bookmarkedGrants, statuses, mi
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Success Rate</p>
               <Badge
-                variant={successRate > 50 ? "success" : successRate > 25 ? "warning" : "destructive"}
-                className="text-xs"
+                variant={successRate > 50 ? "default" : successRate > 25 ? "outline" : "destructive"}
+                className={`text-xs ${successRate > 50 ? "bg-green-100 text-green-800 hover:bg-green-200" : 
+                  successRate > 25 ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" : ""}`}
               >
                 {successRate}%
               </Badge>
